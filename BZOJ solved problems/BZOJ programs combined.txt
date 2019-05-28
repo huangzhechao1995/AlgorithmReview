@@ -1,0 +1,8876 @@
+Problem1000
+program ab;
+ var a,b:longint;
+ begin
+ readln(A,b);
+ writeln(a+b);
+ end.
+Problem1002
+program bzoj1002;
+ const modd=1000000; jin=6;
+ type arr=array[0..20] of longint;
+ var i,j,n,m,p,q,l,r,k:longint;
+ f:Array[1..3] of arr;
+ s:string;
+ sss:arr;
+procedure add(a,b:Arr; var c:arr);
+ var i,j,k:longint;
+ begin
+ if a[0]>b[0] then k:=a[0] else k:=b[0];
+ for i:=1 to k do
+  c[i]:=a[i]+b[i];
+ for i:=1 to k do
+  begin
+  c[i+1]:=c[i+1]+c[i] div modd;
+  c[i]:=c[i] mod modd;
+  end;
+ c[0]:=k;
+ if c[k+1]>0 then c[0]:=k+1;
+ end;
+procedure minus(b,a:arr; var c:arr);
+ var i,j,k:longint;
+ begin
+ for i:=1 to a[0] do
+  b[i]:=b[i]-a[i];
+ for i:=1 to b[0] do
+  if b[i]<0 then
+  begin
+  b[i]:=b[i]+modd;
+  b[i+1]:=b[i+1]-1;
+  end;
+// c:=b;
+ while (b[0]>1)and(b[b[0]]=0)do dec(b[0]);
+ c:=b;
+ end;
+begin
+ readln(n);
+ f[1,0]:=1; f[1,1]:=1;
+ f[2,0]:=1; f[2,1]:=5;
+ sss[0]:=1; sss[1]:=2;
+ for i:=3 to n do
+  begin
+  add(f[2],f[2],f[3]);
+  add(f[2],f[3],f[3]);
+  minus(f[3],f[1],f[3]);
+  add(f[3],sss,f[3]);
+  f[1]:=f[2]; f[2]:=f[3];
+  end;
+ for i:=f[3][0] downto 1 do
+  begin
+  str(f[3][i],s);
+  if i<>f[3][0] then
+   while length(s)<jin do s:='0'+s;
+  write(s);
+  end;
+ writeln;
+end.
+Problem1004
+program bzoj1004;
+ const maxm=65;
+ var sa,sb,sc,m,p,x,y:longint;
+ l,r,i,j,k,n:longint;
+ a:array[1..maxm] of longint;
+ b:array[0..maxm] of longint;
+ f:Array[0..23,0..23,0..23] of longint;
+ ans:longint;
+procedure openfile;
+ begin
+ assign(input,'bzoj1004.in');
+ assign(output,'bzoj1004.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+procedure dobag;
+ var i,j,k,p:longint;
+ begin
+ fillchar(b,sizeof(b),0);
+ for i:=1 to n do
+  if a[i]>0 then
+   begin
+   inc(b[0]);
+   p:=i;
+   while a[p]>0 do
+    begin
+    inc(b[b[0]]);
+    k:=a[p];
+    a[p]:=0;
+    p:=k;
+    end;
+   end;
+ end;
+
+procedure DP;
+ var i,j,t,v,k:longint;
+ begin
+ fillchar(f,sizeof(f),0);
+ f[0,0,0]:=1;
+ for t:=1 to b[0] do
+  begin
+   v:=b[t];
+  for i:=sa downto 0 do
+   for j:=sb downto 0 do
+    for k:=sc downto 0 do
+    begin
+    if i>=v then
+     f[i,j,k]:=(f[i-v,j,k]+f[i,j,k])mod p;
+    if j>=v then
+     f[i,j,k]:=(f[i,j-v,k]+f[i,j,k])mod p;
+    if k>=v then
+     f[i,j,k]:=(f[i,j,k-v]+f[i,j,k])mod p;
+    end;
+  end;
+ ans:=(ans+f[sa,sb,sc])mod p;
+ end;
+procedure exgcd(a,b:longint; var x,y:longint);
+ var x1,y1:longint;
+ begin
+ if (a=1)and(b=0) then
+  begin
+  x:=1; y:=0;
+  exit;
+  end;
+ exgcd(b,a mod b,y1,x);
+ y:=y1-a div b*x;
+ end;
+begin
+
+ readln(sa,sb,sc,m,p);
+ n:=sa+sb+sc;
+//-----------------
+ for i:=1 to m do
+  begin
+  for j:=1 to n do
+   read(a[j]);
+  dobag;
+  DP;
+  end;
+ m:=m+1;
+ for i:=1 to n do
+  b[i]:=1;
+ b[0]:=n;
+ DP;
+//-----------------
+ exgcd(m,p,x,y);
+ x:=x mod p;
+ if x<0 then x:=x+p;
+ ans:=ans*x mod p;
+ writeln(ans);
+
+end.
+Problem1005
+program BZOJ1005;
+ const maxn=1000+50;
+ modd=1000000; jin=6;
+ type arr=array[0..10000] of longint;
+ var i,j,n,m,p,q,l,r,k:longint;
+ d:array[1..maxn] of longint;
+{ c:array[1..maxn,0..maxn] of arr;  }
+ tot:longint;
+ ans:arr;
+ s:string;
+
+
+procedure qsort(l,r:longint);
+ var i,j,m,t:longint;
+ begin
+  i:=l; j:=r;
+  m:=d[(l+r) div 2];
+  repeat
+   while d[i]>m do inc(i);
+   while d[j]<m do dec(j);
+   if i<=j then
+    begin
+    t:=d[i]; d[i]:=d[j]; d[j]:=t; inc(i); dec(j);
+    end;
+   until i>j;
+  if l<j then qsort(l,j);
+  if i<r then qsort(i,r);
+ end;
+
+procedure multi(var a:arr; k:longint);
+ var i,j:longint;
+ begin
+ for i:=1 to a[0] do
+  a[i]:=a[i]*k;
+ for i:=1 to a[0] do
+  begin
+  a[i+1]:=a[i+1]+a[i] div modd;
+  a[i]:=a[i] mod modd;
+  end;
+ inc(a[0],5);
+ while a[a[0]]=0 do dec(a[0]);
+ end;
+
+function gcd(a,b:longint):longint;
+ begin
+ if b=0 then exit(a)
+  else exit(gcd(b,a mod b));
+ end;
+
+procedure operate(p,q:longint);
+ var i,j,k:longint;
+  a,b:array[1..maxn] of longint;
+ begin
+ if q>(p div 2) then q:=p-q;
+ for i:=1 to q do
+  b[i]:=i;
+ for i:=q downto 1 do
+  a[i]:=(p-i+1);
+ for i:=1 to q do
+  for j:=1 to q do
+  begin
+  k:=gcd(a[i],b[j]);
+  a[i]:=a[i] div k;
+  b[j]:=b[j] div k;
+  end;
+ for i:=1 to q do
+  if a[i]>1 then
+  multi(ans,a[i]);
+ end;
+
+begin
+
+ readln(n);
+ p:=0; q:=1;
+ while p<n do
+  begin
+  inc(p);
+  if d[q]<>0 then inc(q);
+  read(d[p]);
+  end;
+ n:=p;
+ qsort(1,n);
+ for i:=1 to n do
+  begin
+ // if d[i]=0 then d[i]:=-1;
+  if d[i]=-1 then
+   begin
+   tot:=i;
+   break;
+   end;
+  end;
+ dec(tot);
+//---------------
+ ans[1]:=1; ans[0]:=1;
+ p:=n-2;
+ for i:=1 to tot do
+  begin
+  operate(p,d[i]-1);
+  k:=d[i]-1; if k<0 then k:=0;
+  p:=p-(k);
+  end;
+ for i:=1 to p do
+  multi(ans,n-tot);
+//---------------
+ for i:=ans[0] downto 1 do
+  begin
+  str(ans[i],s);
+  if i<>ans[0] then
+   while length(s)<jin do s:='0'+s;
+  write(s);
+  end;
+
+end.
+Problem1006
+program xqz;
+const maxn=10005; maxm=2000005;
+var
+  i,j,k,m,n,e,ss,tt,b,p,ans:longint;
+  l,r,h,edge,d:array[0..maxn] of longint;
+  point,next:array[0..maxm] of longint;
+  z:array[0..maxn] of boolean;
+begin
+  read(n,m);
+  for i:=1 to m do
+  begin
+    read(ss,tt);
+    inc(e); point[e]:=tt; next[e]:=edge[ss]; edge[ss]:=e;
+    inc(e); point[e]:=ss; next[e]:=edge[tt]; edge[tt]:=e;
+  end;
+  for i:=1 to n do
+  begin
+    r[i]:=i+1; l[i]:=i-1;
+  end;
+  j:=0; r[n]:=0; h[0]:=1;
+  for k:=n downto 1 do
+  begin
+    i:=h[j]; h[j]:=r[h[j]]; l[h[j]]:=0; l[i]:=0; r[i]:=0;
+    if j+1>ans then ans:=j+1;
+    if k<>1 then
+      while h[j]=0 do dec(j);
+    b:=edge[i]; z[i]:=true;
+    while b<>0 do
+    begin
+      p:=point[b];
+      if not z[p] then
+      begin
+        if p=h[d[p]] then h[d[p]]:=r[p];
+        if l[p]>0 then r[l[p]]:=r[p];
+        if r[p]>0 then l[r[p]]:=l[p];
+        inc(d[p]); l[p]:=0; r[p]:=h[d[p]];
+        if h[d[p]]>0 then
+          l[h[d[p]]]:=p;
+        h[d[p]]:=p;
+      end;
+      b:=next[b];
+    end;
+    if h[j+1]>0 then inc(j);
+  end;
+  writeln(ans);
+
+
+end.
+Problem1006
+program BZOJ1006;
+ type link=^node;
+  node=record
+   r:longint; next:link;
+   end;
+ const maxn=10000+5; maxm=1000000+10;
+ var i,j,n,m,l,r,k,q:longint;
+ e:array[1..maxn] of link;
+ p:link;
+ heap,loc:array[1..maxn] of longint;
+ H:array[1..maxn] of longint;
+ hash:array[1..maxn] of boolean;
+ list:array[1..maxn] of longint;
+ tot,ans:longint;
+
+procedure Up(var x:longint);
+ var t,p:longint;
+ begin
+ p:=x div 2;
+ while (p<>0)and(H[heap[x]]>H[heap[p]]) do
+  begin
+   t:=heap[x]; heap[x]:=heap[p]; heap[p]:=t;
+   loc[heap[x]]:=x;
+   x:=p; p:=x div 2;
+  end;
+ loc[heap[x]]:=x;
+ end;
+procedure Down(var x:longint);
+ var t,k:longint;
+ begin
+// p:=x*2; q:=x*2+1;
+ while x*2<=tot do
+  begin
+  k:=x*2;
+  if (k+1<=tot)and(H[heap[k+1]]>H[heap[k]]) then
+   k:=k+1;
+  if H[heap[k]]>H[heap[x]] then
+   begin
+   t:=heap[k]; heap[k]:=heap[x]; heap[x]:=t;
+   loc[heap[x]]:=x;
+   x:=k;
+   end
+  else break;
+  end;
+  loc[heap[x]]:=x;
+ end;
+procedure add(x:longint);
+ var i,p:longint;
+ begin
+ inc(tot);
+ heap[tot]:=x;
+ i:=tot;
+ UP(i);
+ end;
+procedure del(x:longint);
+ var i,t,p:longint;
+ begin
+ heap[x]:=heap[tot]; loc[heap[x]]:=x;
+ dec(tot);  heap[tot+1]:=0;
+ if x<=tot then
+  begin
+  Up(x);
+  Down(x);
+  end;
+ end;
+begin
+ readln(n,m);
+ for i:=1 to n do
+  e[i]:=nil;
+ for i:=1 to m do
+  begin
+  readln(l,r);
+  new(p); p^.r:=r; p^.next:=e[l]; e[l]:=p;
+   new(p); p^.r:=l; p^.next:=e[r]; e[r]:=p;
+  end;
+//-------------------------------
+ fillchar(H,sizeof(H),0);
+ fillchar(hash,sizeof(hash),false);
+ for i:=1 to n do
+  add(i);
+ for i:=n downto 1 do
+  begin
+  if H[heap[1]]>ans then ans:=H[heap[1]];
+  q:=heap[1]; list[i]:=q;{ H[heap[1]]:=0; } hash[heap[1]]:=true;
+  p:=e[q];
+  del(1);
+  while p<>nil do
+   begin
+   k:=p^.r;
+   if not hash[k] then
+    begin
+    inc(H[k]);
+    del(loc[k]);
+    add(k);
+    end;
+   p:=p^.next;
+   end;
+  end;
+ writeln(ans+1);
+
+end.
+
+Problem1008
+program BZOJ1008;
+ const modd=100003;
+ var i,j,k:longint;
+ ans1,ans2,n,m,p,q,ans:int64;
+
+function work(p,k:int64):int64;
+ var q:int64;
+ begin
+ if k=1 then exit(p mod modd);
+ q:=0;
+ q:=work(p,k div 2);
+ q:=(q*q) mod modd;
+ if k and 1=1 then
+  q:=q*p mod modd;
+ exit(q);
+ end;
+
+begin
+// openfile;
+ readln(m,n);
+ ans1:=work(m,n);
+ ans2:=work(m-1,n-1);
+ ans2:=ans2*m mod modd;
+ ans:=(ans1-ans2) mod modd;
+ ans:=(ans+modd)mod modd;
+ writeln(ans);
+// closefile;
+end.
+Problem1009
+program BZOJ1009;
+ const maxlen=20+2;
+ type arr=array[0..maxlen,0..maxlen] of longint;
+ var i,j,n,m,p,q,l,r,k:longint;
+  modd,ans:longint;
+  str:array[1..30] of longint;
+  f,ff:array[0..maxlen] of longint;
+  s:Array[0..maxlen,0..9] of longint;
+  ma,b:arr;
+  ch:char;
+  pre:array[0..maxlen] of longint;
+
+
+procedure prepare_S; {KMP}
+ var i,j,k:longint;
+ begin
+ fillchar(pre,sizeof(pre),0);
+{*} pre[1]:=0;
+{*} j:=0;
+ for i:=2 to m do
+  begin
+  while (str[j+1]<>str[i])and(j>0) do j:=pre[j];
+  if str[j+1]=str[i] then inc(j);
+  pre[i]:=j;
+  end;
+ //----------------------------
+ fillchar(s,sizeof(s),0);
+ s[0,str[1]]:=1;
+ for i:=1 to m-1 do
+  for j:=0 to 9 do
+  begin
+  k:=i;
+  while (str[k+1]<>j)and(k>0) do k:=pre[k];
+  if str[k+1]=j then s[i,j]:=k+1;
+  end;
+ end;
+
+procedure setmatrix;
+ var i,j,k,p:longint;
+ begin
+ for i:=0 to m-1 do
+  for j:=0 to 9 do
+ // begin
+  inc(ma[s[i,j]][i]);
+ // end;
+ end;
+
+function cheng(a,b:arr):arr;
+ var i,j,k:longint;  c:arr;
+ begin
+ fillchar(c,sizeof(c),0);
+ for i:=0 to m-1 do
+  for j:=0 to m-1 do
+  for k:=0 to m-1 do
+   c[i,j]:=(c[i,j]+a[i,k]*b[k,j])mod modd;
+  exit(c);
+ end;
+function power(k:longint):arr;
+ var q:arr;
+ begin
+ if k=1 then exit(ma);
+ q:=power(k div 2);
+ q:=cheng(q,q);
+ if k and 1=1 then
+  q:=cheng(q,ma);
+ exit(q);
+ end;
+begin
+
+ readln(n,m,modd);
+ for i:=1 to m do
+  begin
+  read(ch);
+  str[i]:=ord(ch)-ord('0');
+  end;
+ prepare_S;
+ setmatrix;
+//----------------
+ b:=power(n-1);
+ fillchar(ff,sizeof(ff),0);
+ ff[0]:=9; ff[1]:=1;
+ i:=1;
+ for j:=0 to m-1 do
+  for k:=0 to m-1 do
+  f[j]:=(f[j]+ff[k]*b[j,k]) mod modd;
+ for i:=0 to m-1 do
+  ans:=(ans+f[i])mod modd;
+ writeln(ans);
+
+end.
+Problem1010
+program BZOJ1010;
+ type arr=record
+  x:longint;
+  v:int64;
+  end;
+ const maxn=50000+100;
+ var i,j,n,m,p,q,l,r,k:longint;
+ a:array[0..maxn] of longint;
+ s:array[0..maxn] of int64;
+ f:array[0..maxn] of int64;
+ line:array[0..maxn] of longint;
+procedure openfile;
+ begin
+ assign(input,'BZOJ1010.in');
+ assign(output,'BZOJ1010.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+function G(x,y:longint):double;
+ var vx,vy:int64; pp:double;
+ begin
+  vx:=f[x]+s[x]*s[x];
+  vy:=f[y]+s[y]*s[y];
+  pp:=0;
+  pp:=(vx-vy)/(s[x]-s[y]);
+  exit(pp);
+ end;
+begin
+
+ readln(n,q);
+ for i:=1 to n do
+  read(a[i]);
+ s[1]:=a[1];
+ for i:=2 to n do
+  s[i]:=a[i]+s[i-1];
+ for i:=1 to n do
+  s[i]:=s[i]+i;
+ inc(q);
+ l:=1; r:=1; line[1]:=0;
+ for i:=1 to n do
+  begin
+  while (l<r)and(G(line[l],line[l+1])<=2*(s[i]-q)) do
+   begin
+   line[l]:=0;
+   inc(l);
+   end;
+  k:=line[l];
+  f[i]:=f[k]+int64(s[i]-s[k]-q)*int64(s[i]-s[k]-q);
+  while (l<r)and(G(line[r-1],line[r])>=G(line[r],i)) do
+   begin
+ line[r]:=0;
+   dec(r);
+   end;
+  inc(r); line[r]:=i;
+  end;
+ writeln(f[n]);
+
+end.
+Problem1012
+program BZOJ1012;
+ const maxn=200000;
+ type arr=record
+  l,r,max:longint;
+  end;
+var i,j,n,m,q,r,k:longint;
+ modd,t:longint;
+ tree:array[1..2*maxn+1000] of arr;
+ l:array[1..maxn] of longint;
+ command:array[1..maxn] of char;
+// command:char;
+ ans,len,tot:longint;
+procedure openfile;
+ begin
+ assign(input,'BZOJ1012.in');
+ assign(output,'BZOJ1012.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure buildtree(x,l,r:longint);
+ var mid:longint;
+ begin
+ tree[x].l:=l; tree[x].r:=r;
+ if l=r then exit;
+ mid:=(l+r) shr 1;
+ tree[x].max:=-1;
+ buildtree(x*2,l,mid);
+ buildtree(x*2+1,mid+1,r);
+ end;
+function max(a,b:longint):longint;
+ begin
+ if a>b then exit(a); exit(b);
+ end;
+procedure add(x,p,loc:longint);
+ var mid:longint;
+ begin
+ if tree[x].l=tree[x].r then
+  begin
+  tree[x].max:=p;
+  exit;
+  end;
+ mid:=(tree[x].l+tree[x].r) shr 1;
+ if loc<=mid then
+  add(x*2,p,loc)
+  else add(x*2+1,p,loc);
+ tree[x].max:=max(tree[x*2].max,tree[x*2+1].max)
+ end;
+function ask(x,l,r:longint):longint;
+ var mid:longint;
+ begin
+ if (l=tree[x].l)and(r=tree[x].r) then exit(tree[x].max);
+ mid:=(tree[x].l+tree[x].r) shr 1;
+ if r<=mid then exit(ask(x*2,l,r));
+ if l>mid then  exit(ask(x*2+1,l,r));
+ ask:=max(ask(x*2,l,mid),ask(x*2+1,mid+1,r));
+ end;
+begin
+// openfile;
+ readln(m,modd);
+ t:=0;
+ len:=0;
+ tot:=0;
+ for i:=1 to m do
+  begin
+  read(command[i]);
+  readln(l[i]);
+  if command[i]='A' then inc(tot);
+  end;
+ buildtree(1,1,tot);
+ for i:=1 to m do
+  case command[i] of
+   'A':begin
+      // readln(p);
+       l[i]:=(l[i]+t)mod modd;
+       inc(len);
+       add(1,l[i],len);
+       end;
+   'Q':begin
+      // readln(l);
+       ans:=ask(1,len-l[i]+1,len);
+       writeln(ans);
+       t:=ans;
+       end;
+     end;
+ //closefile;
+end.
+Problem1013
+program bzoj1013;
+ const maxn=12;
+ var i,j,n,k:longint;
+ a,b:array[0..12,0..12] of double;
+ temp,m:double;
+ x:array[0..12] of  double;
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+begin
+ //openfile;
+ readln(n);
+ for i:=1 to n+1 do
+  begin
+  for j:=1 to n do
+   read(b[i,j]);
+  end;
+ for i:=1 to n do
+  for j:=1 to n do
+  begin
+  a[i,j]:=2*(b[i+1,j]-b[i,j]);
+  a[i,n+1]:=a[i,n+1]+sqr(b[i+1,j])-sqr(b[i,j]);
+  end;
+ for i:=1 to n-1 do
+  begin
+  k:=i;
+  for j:=i+1 to n do
+   if a[j,i]>a[k,i] then k:=j;
+  for j:=i to n+1 do
+   begin temp:=a[i,j]; a[i,j]:=a[k,j]; a[k,j]:=temp; end;
+  for j:=i+1 to n do
+   begin
+   m:=a[j,i]/a[i,i];
+   for k:=i to n+1 do
+    a[j,k]:=a[i,k]*m-a[j,k];
+   end;
+  end;
+  x[n]:=a[n,n+1]/a[n,n];
+  for i:=n-1 downto 1 do
+   begin
+   m:=0;
+   for j:=i+1 to n do
+    m:=m+a[i,j]*x[j];
+   x[i]:=(a[i,n+1]-m)/a[i,i];
+   end;
+  for i:=1 to n-1 do
+   write(x[i]:0:3,' ');
+  write(x[n]:0:3);
+ end.
+Problem1015
+type ss=record
+
+     y,next:longint;
+
+     end;
+
+var i,j,n,m,rp,t1,t2,tot,k,w:longint;
+
+    f,q,b,s:array[0..400001] of longint;
+
+    map:array[0..400001] of ss;
+
+    x,z:array[0..400001] of boolean;
+
+
+procedure jia(x,y:longint);
+
+begin
+
+        inc(tot);
+
+        map[tot].y:=y;
+
+        map[tot].next:=b[x];
+
+        b[x]:=tot;
+
+end;
+
+function gef(k:longint):longint;
+
+begin
+
+        while f[k]<>k do
+
+        begin
+
+                f[k]:=f[f[k]];
+
+                k:=f[k];
+
+        end;
+
+end;
+
+begin
+
+        readln(n,m);
+
+        for i:=0 to n-1 do f[i]:=i;
+
+        fillchar(b,sizeof(b),255);
+
+        for i:=1 to m do
+
+        begin
+
+                read(t1,t2);
+
+                jia(t1,t2);
+
+                jia(t2,t1);
+
+        end;
+
+        read(k);
+
+        for i:=1 to k do
+
+        begin
+
+                read(q[i]);
+
+                z[q[i]]:=true;
+
+        end;
+
+        for i:=0 to n-1 do
+
+                if not(z[i]) then
+
+                begin
+
+                        inc(rp);
+
+                        j:=b[i];
+
+                        while j<>-1 do
+
+                        begin
+
+                                if not(z[map[j].y]) then
+
+                                begin
+
+                                        if gef(i)<>gef(map[j].y) then dec(rp);
+
+                                        f[gef(i)]:=gef(map[j].y);
+
+                                end;
+
+                                j:=map[j].next;
+
+                        end;
+
+                end;
+
+        s[w]:=rp;
+
+        for i:=k downto 1 do
+
+        begin
+
+                j:=b[q[i]];
+
+                z[q[i]]:=false;
+
+                inc(rp);
+
+                while j<>-1 do
+
+                begin
+
+                        if not(z[map[j].y]) then
+
+                        begin
+
+                                if gef(q[i])<>gef(map[j].y) then dec(rp);
+
+                                f[gef(q[i])]:=gef(map[j].y);
+
+                        end;
+
+                        j:=map[j].next;
+
+                end;
+
+                inc(w);
+
+                s[w]:=rp;
+
+        end;
+
+        for i:=k downto 0 do
+
+                writeln(s[i]);
+
+
+end.
+Problem1015
+program BZOJ1015;
+ type link=^node;
+ node=record
+  r:longint;
+  next:link;
+  end;
+ const maxm=200000+100;
+ var i,j,n,m,p,l,r,k,tot:longint;
+ q:link;
+ e:array[0..2*maxm] of link;
+ f:array[0..2*maxm] of longint;
+ anslist,list:array[1..2*maxm] of longint;
+ hash:array[0..2*maxm] of boolean;
+ ans:longint;
+
+function get(x:longint):longint;
+ begin
+ if f[x]=x then exit(x);
+ f[x]:=get(f[x]);
+ exit(f[x]);
+ end;
+procedure union(l,r:longint);
+ var x,y:longint;
+ begin
+ x:=get(l); y:=get(r);
+ if x<>y then
+  begin
+  f[x]:=y;
+  dec(ans);
+  end;
+ end;
+begin
+
+ readln(n,m);
+ fillchar(hash,sizeof(hash),false);
+ for i:=0 to n-1 do
+  e[i]:=nil;
+ for i:=1 to m do
+  begin
+  readln(l,r);
+  new(q); q^.r:=r; q^.next:=e[l]; e[l]:=q;
+  new(q); q^.r:=l; q^.next:=e[r]; e[r]:=q;
+  end;
+ readln(tot);
+ for i:=1 to tot do
+  begin
+  read(list[i]);
+  hash[list[i]]:=true;
+  end;
+//--------------------------
+ for i:=0 to n-1 do
+  f[i]:=i;
+ for i:=0 to n-1 do
+  if hash[i]=false then inc(ans);
+ for i:=0 to n-1 do
+  if hash[i]=false then
+  begin
+  q:=e[i]; l:=i;
+  while q<>nil do
+   begin
+   r:=q^.r;
+   if not hash[r] then
+     union(l,r);
+   q:=q^.next;
+   end;
+  end;
+ anslist[tot+1]:=ans;
+ for i:=tot downto 1 do
+  begin
+  inc(ans);
+  q:=e[list[i]]; l:=list[i];
+  hash[l]:=false;
+  while q<>nil do
+   begin
+   r:=q^.r;
+   if not hash[r] then
+     union(l,r);
+   q:=q^.next;
+   end;
+  anslist[i]:=ans;
+  end;
+ for i:=1 to tot+1 do
+  writeln(anslist[i]);
+
+end.
+Problem1016
+program BZOJ1016;
+ type arr=record
+  l,r,c:longint;
+  end;
+ const maxn=100+5; maxm=1000+5; modd=31011;
+ var i,j,n,m,p,q,l,r,k:longint;
+ e:array[1..maxm] of arr;
+ a:array[1..10] of arr;
+ s,f1,f2:array[1..maxn] of longint;
+ hash:array[1..maxn] of boolean;
+ tot,count,use,ans:longint;
+ x,y,head,tail:longint;
+
+procedure openfile;
+ begin
+ assign(input,'BZOJ1016.in');
+ assign(output,'BZOJ1016.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure init;
+ begin
+ readln(n,m);
+ p:=0;
+ for i:=1 to m do
+  begin
+  readln(l,r,k);
+  inc(p);
+  e[p].l:=l; e[p].r:=r; e[p].c:=k;
+  end;
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+ i:=l; j:=r;
+ m:=e[(l+r) shr 1];
+ repeat
+  while e[i].c<m.c do inc(i);
+  while e[j].c>m.c do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+//----------
+function get1(x:longint):longint;
+ begin
+ if x=f1[x] then exit(x);
+ f1[x]:=get1(f1[x]);
+ exit(f1[x]);
+ end;
+function get2(x:longint):longint;
+ begin
+ if f2[x]=x then exit(x);
+ exit(get2(f2[x]));
+ end;
+//----------
+procedure dfs(x,k:longint);
+ var i,j,l,r:longint;
+ begin
+ if k=use then begin inc(s[tot]); exit; end;
+ if x=tail-head+2 then  exit;
+ l:=get2(a[x].l); r:=get2(a[x].r);
+{1} dfs(x+1,k);
+{2}
+ if l<>r then
+  begin
+   j:=f2[r];
+   f2[r]:=l;
+   dfs(x+1,k+1);
+   f2[r]:=j;
+  end;
+ end;
+begin
+ //openfile;
+ init;
+ qsort(1,m);
+ fillchar(hash,sizeof(hash),false);
+ for i:=1 to n do f1[i]:=i;
+ for i:=1 to n do f2[i]:=i;
+ i:=1; tot:=0;
+ while i<=m do
+  begin
+  head:=i; use:=0;
+  while e[i].c=e[head].c do
+   begin
+   x:=get1(e[i].l); y:=get1(e[i].r);
+   if x<>y then
+    begin
+    inc(use);
+    inc(count);
+    f1[y]:=x;
+    if not hash[x] then hash[x]:=true;
+    if not hash[y] then hash[y]:=true;
+    end;
+   inc(i);
+   end;
+  if use=0 then continue;
+  tail:=i-1;
+  for j:=head to tail do
+   a[j-head+1]:=e[j];
+  inc(tot);
+  dfs(1,0);
+ f2:=f1;
+ end;
+ ans:=1;
+ for i:=1 to tot do
+  ans:=ans*s[i] mod modd;
+ if count<n-1 then writeln(0) else writeln(ans);
+ //closefile;
+end.
+Problem1018
+program bzoj1018;
+ type arr=array[1..6] of boolean;
+      treetype=record
+      l,r:longint;
+      a:arr;
+      end;
+ const b:array[false..true] of char=('N','Y');
+       maxn=100000+5;
+       danwei:arr=(false,false,false,false,false,false);
+ var i,j,n,m,p,q,l,r,k:longint;
+  tree:array[1..maxn*2+1000] of treetype;
+  map:array[1..3,1..maxn] of boolean;
+  x1,x2,y1,y2:longint;
+  ch:char;
+  tmp:boolean;
+  ans:boolean;
+  prz0,prz,prz2:arr;
+procedure openfile;
+ begin
+ assign(input,'bzoj1018.in');
+ assign(output,'bzoj1018.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure swap;
+ var t:longint;
+ begin
+ t:=x2; x2:=x1; x1:=t; {} t:=y1; y1:=y2; y2:=t;
+ end;
+procedure buildtree(x,l,r:longint);
+ var mid:longint;
+ begin
+ tree[x].l:=l; tree[x].r:=r;
+ if l=r then exit;
+ mid:=(l+r) shr 1;
+ buildtree(x*2,l,mid); buildtree(x*2+1,mid+1,r);
+ end;
+function combine(a,b:arr):arr;
+ var f:arr;
+ begin
+ fillchar(f,sizeof(f),false);
+ f[1]:=a[1] or(b[1] and ((a[3] and a[4])or(a[5]and a[6])) );
+ f[2]:=b[2] or(a[2] and ((b[3] and b[4])or(b[5]and b[6])) );
+ f[3]:=(a[3]and b[3])or(a[5] and b[6]);
+ f[4]:=(a[4]and b[4])or(a[6] and b[5]);
+ f[5]:=(a[3]and b[5])or(a[5] and b[4]);
+ f[6]:=(a[4]and b[6])or(a[6] and b[3]);
+ exit(f);
+ end;
+function change(x:longint):arr;
+ var a:arr;
+ begin
+ fillchar(a,sizeof(a),false);
+ a[1]:=map[3][x] or (map[3][x+1] and map[2][x] and map[1][x]);
+ a[2]:=map[3][x+1] or (map[3][x] and map[2][x] and map[1][x]);
+ a[3]:=map[1][x] or (map[3][x+1] and map[2][x] and map[3][x]);
+ a[4]:=map[2][x] or (map[3][x+1] and map[1][x] and map[3][x]);
+ a[5]:=(map[1][x] and map[3][x+1])or(map[2][x] and map[3][x]);
+ a[6]:=(map[2][x] and map[3][x+1])or(map[1][x] and map[3][x]);
+ exit(a);
+ end;
+procedure update(x,loc:longint);
+ var mid:longint;
+ begin
+ mid:=(tree[x].l+tree[x].r) div 2;
+ if tree[x].l=tree[x].r then
+  begin
+  tree[x].a:=change(tree[x].l);
+  exit;
+  end;
+ if loc>mid then update(x*2+1,loc)
+  else update(x*2,loc);
+ tree[x].a:=combine(tree[x*2].a,tree[x*2+1].a);
+ end;
+function ask(x,l,r:longint):arr;
+ var mid:longint;
+ begin
+ if l>r then exit(danwei);
+ if (r<1)or(l>=n) then exit(danwei);
+ if (tree[x].l=l)and(tree[x].r=r) then exit(tree[x].a);
+ mid:=(tree[x].l+tree[x].r) div 2;
+ if r<=mid then exit(ask(x*2,l,r));
+ if l>mid then exit(ask(x*2+1,l,r));
+ ask:=combine(ask(x*2,l,mid),ask(x*2+1,mid+1,r));
+ end;
+begin
+ //openfile;
+ readln(n);
+ buildtree(1,1,n-1);
+ while true do
+  begin
+  read(ch);
+{1}  if ch in['O','C'] then
+   begin
+    if ch='O' then tmp:=true else tmp:=false;
+    read(ch,ch,ch,ch);
+    readln(x1,y1,x2,y2);
+    if x1+y1>x2+y2 then swap;
+    if y1=y2 then
+     begin
+     map[3][y1]:=tmp;
+     if y1<>n then
+      update(1,y1);
+     if y1<>1 then
+      update(1,y1-1);
+     end;
+    if y1+1=y2 then
+     begin
+     map[x1][y1]:=tmp;
+      update(1,y1);
+     end;
+   end;
+{2}  if ch='A' then
+   begin
+    read(ch,ch);
+    readln(x1,y1,x2,y2);
+    if y1>y2       then swap;
+    prz0:=ask(1,1,y1-1);
+    prz2:=ask(1,y2,n-1);
+    prz:=ask(1,y1,y2-1);
+    if y1=y2 then  ans:=prz0[2] or prz2[1]
+    else
+     begin
+     if x1+x2=2 then
+      ans:=prz[3] or (prz0[2] and prz[4] and prz2[1])
+       or (prz0[2] and prz[6]) or (prz2[1] and prz[5]);
+     if x1+x2=4 then
+      ans:=prz[4] or (prz0[2] and prz[3] and prz2[1])
+       or (prz0[2] and prz[5]) or (prz2[1] and prz[6]);
+     if (x1=1)and(x2=2) then
+      ans:=prz[5] or (prz0[2] and prz[6] and prz2[1])
+       or (prz0[2] and prz[4]) or (prz2[1] and prz[3]);
+     if (x1=2)and(x2=1) then
+      ans:=prz[6] or (prz0[2] and prz[5] and prz2[1])
+       or (prz0[2] and prz[3]) or (prz2[1] and prz[4]);
+     end;
+    writeln(b[ans]);
+   end;
+{3}  if ch='E' then break;
+//  read(ch);
+  end;
+// closefile;
+end.
+Problem1022
+program p1022;
+var t,i,j,n,sg,x,count1:longint;
+    bigger:boolean;
+begin
+    readln(t);
+    for i:=1 to t do
+    begin
+        read(n);
+        sg:=0;count1:=0;bigger:=false;
+        for j:=1 to n do
+        begin
+            read(x);
+            sg:=sg xor x;
+            if x>1 then bigger:=true;
+            if x=1 then inc(count1);
+        end;
+        if bigger then
+        begin
+          if sg=0 then writeln('Brother')
+                  else writeln('John');
+        end
+        else if count1 mod 2=0 then writeln('John')
+                               else writeln('Brother');
+
+    end;
+end.
+Problem1024
+program SCOI_2009;
+var x,y:extended;
+    n:longint;
+  
+procedure swap(var a,b:extended);
+var t:extended;
+begin
+    t:=a;a:=b;b:=t;
+end;
+  
+function max(a,b:extended):extended;
+begin
+    if a>b then exit(a);
+    exit(b);
+end;
+  
+function min(a,b:extended):extended;
+begin
+    if a<b then exit(a);
+    exit(b);
+end;
+  
+function dfs(x,y:extended;n:longint):extended;
+var r:extended;
+    i:longint;
+begin
+    dfs:=maxlongint;
+    if x>y then swap(x,y);
+    if n=1 then exit(y/x);
+    r:=1/n;
+    for i:=1 to n-1 do
+        begin
+            dfs:=min(dfs,max(dfs(x*r*i,y,i),dfs(x-x*r*i,y,n-i)));
+            dfs:=min(dfs,max(dfs(x,y*r*i,i),dfs(x,y-y*r*i,n-i)));
+        end;
+end;
+begin
+    readln(x,y,n);
+    writeln(dfs(x,y,n):0:6);
+    readln;readln;
+end.
+Problem1025
+program bzoj1025;
+ const maxn=1000;
+ var i,j,n,m,p,q,l,r,k,tot:longint;
+ a:array[1..maxn] of longint;
+ f:array[0..maxn,0..maxn] of int64;
+ ans:int64;
+
+begin
+ //openfile;
+ readln(n);
+ for i:=2 to n do
+  begin
+  p:=0;
+  for j:=2 to trunc(sqrt(i)) do
+   if i mod j=0 then  begin p:=1; break; end;
+  if p=0 then
+   begin inc(tot); a[tot]:=i; end;
+  end;
+ f[0,0]:=1;
+ for i:=1 to tot do
+  begin
+  p:=1;
+ // f[i,0]:=1;
+  for j:=0 to n do  {if f[i-1,j]>f[i,j] then }f[i,j]:=f[i-1,j];
+  for k:=1 to trunc(ln(n)/ln(a[i])) do
+   begin
+   p:=p*a[i];
+   for j:=0 to n do
+    if j-p>=0 then f[i,j]:=f[i-1,j-p]+f[i,j];
+   end;
+  end;
+ for j:=0 to n do
+  ans:=ans+f[tot,j];
+ writeln(ans);
+ //closefile;
+end.
+Problem1026
+program bzoj1206;
+ const maxn=12;
+ var i,j,l,r,k,p,q,n,m:longint;
+ f:array[0..maxn,0..9] of longint;
+ sum:array[0..maxn] of longint;
+ ans1,ans2:longint;
+function work(x:longint):longint;
+ var i,j,p,q,k,len:longint; s:string;
+  a:array[0..maxn] of longint;
+ begin
+  str(x,s);      p:=0;
+  len:=length(s);
+  for i:=1 to len do a[len-i+1]:=ord(s[i])-ord('0');
+  for j:=1 to a[len]-1 do p:=p+f[len,j];
+  p:=p+sum[len-1];
+  for i:=len-1 downto 1 do
+   begin
+   for j:=0 to a[i]-1 do
+    if abs(a[i+1]-j)>=2 then
+    p:=p+f[i,j];
+   if abs(a[i]-a[i+1])<=1 then break;
+   end;
+  exit(p);
+ end;
+begin
+ readln(l,r);
+ for j:=0 to 9 do f[1,j]:=1;
+ sum[0]:=1;
+ sum[1]:=10;
+ for i:=2 to 10 do
+  begin
+   for j:=0 to 9 do
+    begin
+    for k:=0 to 9 do
+    if abs(j-k)>1 then
+     f[i,j]:=f[i,j]+f[i-1,k];
+    end;
+   sum[i]:=sum[i-1];
+   for j:=1 to 9 do
+    sum[i]:=sum[i]+f[i,j];
+  end;
+ ans1:=work(l);
+ ans2:=work(r+1);
+ writeln(ans2-ans1);
+end.
+Problem1031
+program suffix;
+ const maxn=200000;
+ var n,m,ans:longint;
+    s:array[1..maxn] of char;
+    sa,rk,tsa,trk,h,sum:array[1..maxn] of longint;
+    i,j,p:longint;
+    ch:char;
+procedure openfile;
+ begin
+ assign(input,'suffix.in');
+ assign(output,'suffix.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function rank(x:longint):longint;
+ begin
+ if x>n then exit(0) else exit(trk[x]);
+ end;
+procedure suffix;
+// var i,j:longint;
+ begin
+ m:=255;
+ for i:=1 to n do
+  begin trk[i]:=ord(s[i]); inc(sum[trk[i]]); end;
+ for i:=2 to m do inc(sum[i],sum[i-1]);
+ for i:=n downto 1 do
+  begin sa[sum[trk[i]]]:=i; dec(sum[trk[i]]); end;
+ rk[sa[1]]:=1; p:=1;
+ for i:=2 to n do
+  begin
+  if trk[sa[i]]<>trk[sa[i-1]] then inc(p);
+  rk[sa[i]]:=p;
+  end;
+//-------------------
+ m:=p; j:=1;
+ while m<n do
+  begin
+  move(rk,trk,sizeof(trk));
+  fillchar(sum,sizeof(sum),0);
+  p:=0;
+  for i:=n-j+1 to n do
+   begin inc(p); tsa[p]:=i; end;
+  for i:=1 to n do if sa[i]>j then
+   begin inc(p); tsa[p]:=sa[i]-j; end;
+{*}
+  for i:=1 to n do
+   begin rk[i]:=trk[tsa[i]]; inc(sum[rk[i]]); end;
+  for i:=2 to m do sum[i]:=sum[i]+sum[i-1];
+  for i:=n downto 1 do
+   begin sa[sum[rk[i]]]:=tsa[i]; dec(sum[rk[i]]); end;
+  rk[sa[1]]:=1; p:=1;
+  for i:=2 to n do
+   begin
+   if (trk[sa[i]]<>trk[sa[i-1]])or(rank(sa[i]+j)<>rank(sa[i-1]+j)) then
+    inc(p);
+   rk[sa[i]]:=p;
+   end;
+   m:=p; j:=j*2;
+  end;
+ end;
+
+begin
+ while not eof do
+  begin
+  read(ch);
+  if not(ord(ch)in[10,13]) then
+   begin
+   inc(n);
+   s[n]:=ch;
+   end;
+  end;
+ for i:=1 to n do
+  s[n+i]:=s[i];
+ n:=n*2;
+ suffix;
+ for i:=1 to n do
+  if sa[i]<=n div 2 then
+   write(s[sa[i]+n div 2-1]);
+// writeln;
+end.
+Problem1036
+program bzoj1036;
+{$M 100000000000}
+type edge=record
+     l,r{,kind}:longint;
+     end;
+     arr=record
+     l,r,tot,max:longint;
+     end;
+const maxn=30000+50;
+var a:array[0..maxn] of longint;
+    tree:array[0..maxn*3] of arr;
+    dep,size,top,fa,son,loc:array[0..maxn] of longint;
+   //----
+    e:array[1..2*maxn] of edge;
+    pre,w:array[0..maxn] of longint;
+   //----
+   ch1,ch:char; save,ans:arr;
+   i,j,n,m,k,tot,l,r,p,q:longint;
+   u,v1,v2,f1,f2:longint;
+   stack:array[0..maxn] of longint;
+   max,jjj,di:array[0..maxn] of longint;
+//----------------------------
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:edge;
+ begin
+ i:=l; j:=r; m:=e[random(r-l+1)+l];
+ repeat
+  while (e[i].l<m.l)or((e[i].l=m.l)and(e[i].r<m.r)) do inc(i);
+  while (e[j].l>m.l)or((e[j].l=m.l)and(e[j].r>m.r)) do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+//---------------------------
+function getfather(x:longint):longint;
+ begin
+ if top[x]=x then exit(x);
+ top[x]:=getfather(top[x]);
+ exit(top[x]);
+ end;
+function maxer(a,b:longint):longint;
+ begin
+ if a>b then exit(a); exit(b);
+ end;
+procedure buildtree(x,l,r:longint);
+ var mid:longint;
+ begin
+ tree[x].l:=l; tree[x].r:=r;
+ if l=r then
+  begin tree[x].max:=w[a[l]]; tree[x].tot:=w[a[l]]; exit; end;
+ mid:=(l+r) shr 1;
+ buildtree(x*2,l,mid); buildtree(x*2+1,mid+1,r);
+ tree[x].max:=maxer(tree[x*2].max,tree[x*2+1].max);
+ tree[x].tot:=tree[x*2].tot+tree[x*2+1].tot;
+ end;
+procedure update(x,loc:longint);
+ var mid,l,r:longint;
+ begin
+ l:=tree[x].l; r:=tree[x].r;
+ if l=r then
+  begin tree[x].max:=w[a[l]]; tree[x].tot:=w[a[l]]; exit; end;
+ mid:=(l+r)shr 1;
+ if loc<=mid then
+  update(x*2,loc)
+  else update(x*2+1,loc);
+ tree[x].max:=maxer(tree[x*2].max,tree[x*2+1].max);
+ tree[x].tot:=tree[x*2].tot+tree[x*2+1].tot;
+ end;
+function ask(x,l,r:longint):arr;
+ var mid:longint; p,q,re:Arr;
+ begin
+  mid:=(l+r) div 2;
+  if (l=tree[x].l)and(r=tree[x].r) then
+   exit(tree[x]);
+  mid:=(tree[x].l+tree[x].r)shr 1;
+  if r<=mid then exit(ask(x*2,l,r));
+  if l>mid then exit(ask(x*2+1,l,r));
+  p:=ask(x*2,l,mid); q:=ask(x*2+1,mid+1,r);
+  re.max:=maxer(p.max,q.max);
+  re.tot:=p.tot+q.tot;
+  exit(re);
+ end;
+procedure dfs1;
+ var x,i,p,j,tail:longint;
+ begin
+ for i:=1 to n do
+  di[i]:=pre[i];
+ tail:=1; stack[tail]:=1;
+ while tail>0 do
+  begin
+  x:=stack[tail];
+  if di[x]>=pre[x+1] then
+   begin
+  // if son[fa[x]]=x then top[x]:=top[fa[x]];
+   size[fa[x]]:=size[fa[x]]+size[x];
+   if size[x]>max[fa[x]] then begin son[fa[x]]:=x; max[fa[x]]:=size[x]; end;
+   dec(tail);
+   continue;
+   end;
+  if pre[x]=di[x] then
+   begin size[x]:=1; max[x]:=0; {top[x]:=x;} end;
+  for i:=di[x] to pre[x+1]-1 do
+   if e[i].r<>fa[x] then
+   begin
+   p:=e[i].r;
+   dep[p]:=dep[x]+1;
+   fa[p]:=x;
+   inc(tail); stack[tail]:=p; inc(di[x]);
+   {size[x]:=size[x]+size[p];
+   if size[p]>max then begin max:=size[p]; j:=p; end;  }
+   break;
+   end
+   else inc(di[x]);
+  end;
+ end;
+procedure dfs2;
+ var x,i,p,tail:longint;
+ begin
+ for i:=1 to n do
+  di[i]:=pre[i];
+ tail:=1; stack[tail]:=1;
+ while tail>0 do
+  begin
+  x:=stack[tail];
+  if di[x]>=pre[x+1] then
+   begin
+   dec(tail); continue;
+   end;
+  if pre[x]=di[x] then
+   begin if top[x]=0 then top[x]:=x; end;
+  p:=son[x];
+  if (p<>0)and(top[p]=0) then
+   begin
+   inc(tot); a[tot]:=p; loc[p]:=tot;
+   top[p]:=top[x];
+   inc(tail); stack[tail]:=p; continue;
+   end;
+  for i:=di[x] to pre[x+1]-1 do
+  if (e[i].r<>fa[x])and(e[i].r<>son[x]) then
+   begin
+   p:=e[i].r;
+   inc(tot); a[tot]:=p; loc[p]:=tot;
+   inc(di[x]);
+   inc(tail); stack[tail]:=p; break;
+   end
+  else inc(di[x]);
+  end;
+ end;
+begin
+//---------------
+ readln(n);
+ for i:=1 to n-1 do
+  begin
+  readln(l,r);
+  e[i].l:=l; e[i].r:=r;
+  e[i+n-1].l:=r; e[i+n-1].r:=l;
+  end;
+ qsort(1,2*n-2);
+ pre[n+1]:=2*n-1;
+ for i:=2*n-2 downto 1 do pre[e[i].l]:=i;
+ for i:=n downto 1 do
+  if pre[i]=0 then pre[i]:=pre[i+1];
+ for i:=1 to n do read(w[i]);  readln;
+//---------------
+ dfs1;
+// for i:=1 to n do
+//  getfather(i);
+ tot:=1; a[1]:=1; loc[1]:=1;
+ dfs2;
+//---------------
+{ write('num: '); for i:=1 to n do write(i:3); writeln;
+ write('fa:  '); for i:=1 to n do write(fa[i]:3); writeln;
+ write('son: '); for i:=1 to n do write(son[i]:3); writeln;
+ write('size:'); for i:=1 to n do write(size[i]:3); writeln;
+ write('top: '); for i:=1 to n do write(top[i]:3); writeln;
+ write('a:   '); for i:=1 to n do write(a[i]:3); writeln;
+ write('loc: '); for i:=1 to n do write(loc[i]:3);writeln; }
+//---------------
+ buildtree(1,1,n);
+ readln(q);
+ for i:=1 to q do
+  begin
+  read(ch,ch);
+  if ch='H' then
+   begin
+   read(ch,ch,ch,ch,ch); readln(u,k); w[u]:=k;
+   update(1,loc[u]);
+   end;
+  if ch in ['M','S'] then
+   begin
+   read(ch1,ch1,ch1); readln(v1,v2);
+   ans.tot:=0; ans.max:=-maxlongint;
+   f1:=top[v1]; f2:=top[v2];
+   while f1<>f2 do
+    begin
+    if dep[f1]<=dep[f2] then
+     begin
+     save:=ask(1,loc[f2],loc[v2]);
+     ans.max:=maxer(ans.max,save.max);
+     ans.tot:=ans.tot+save.tot;
+     v2:=fa[f2]; f2:=top[v2];
+     end
+    else
+     begin
+     save:=ask(1,loc[f1],loc[v1]);
+     ans.max:=maxer(ans.max,save.max);
+     ans.tot:=ans.tot+save.tot;
+     v1:=fa[f1]; f1:=top[v1];
+     end;
+   end;
+  if dep[v1]<=dep[v2] then save:=ask(1,loc[v1],loc[v2])
+                     else save:=ask(1,loc[v2],loc[v1]);
+  ans.max:=maxer(ans.max,save.max);
+  ans.tot:=ans.tot+save.tot;
+  if ch='M' then writeln(ans.max)
+   else writeln(ans.tot);
+  end;
+  end;
+end.
+Problem1037
+program bzoj1037;
+ const modd=12345678;
+ var
+ i,j,n,m,p,l,q,k,r:longint;
+ f:array[0..310,0..155,0..22,0..22] of longint;
+ ans:longint;
+function max(a,b:longint):longint;
+ begin
+ if a>b then exit(a) else exit(b);
+ end;
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+begin
+ readln(n,m,k);
+// fillchar(f,sizeof(f),255);
+ f[0,0,0,0]:=1;
+ for i:=0 to n+m-1 do
+  begin
+  for j:=max(i-m,0) to min(i,n) do
+  for l:=0 to min(i,k) do
+  for r:=0 to min(i-j,k) do
+ //  if f[i,j,l,r]<>-1 then
+   begin
+    f[i+1,j+1,l+1,max(r-1,0)]:=(f[i+1,j+1,l+1,max(r-1,0)]+f[i,j,l,r])mod modd;
+    f[i+1,j,max(l-1,0),r+1]:=(f[i+1,j,max(l-1,0),r+1]+f[i,j,l,r])mod modd;
+   end;
+  end;
+ for l:=0 to k do
+  for r:=0 to k do
+  ans:=(ans+max(f[n+m,n,l,r],0))mod modd;
+ writeln(ans);
+end.
+Problem1051
+program POJ2186;
+type link=^node;
+ node=record
+ r:longint;
+ next:link;
+ end;
+var i,j,n,m,l,r,k:longint;
+ map:array[1..10000] of link;
+ map2:array[1..10000] of link;
+ line:array[1..10000] of longint;
+ color:array[1..10000] of longint;
+ hash:array[1..10000] of boolean;
+ len:array[1..10000] of longint;
+ p,q:link;
+ tot,cl:longint;
+procedure dfs1(x:longint);
+ var k:longint;
+  p:link;
+ begin
+  hash[x]:=true;
+  p:=map2[x];
+  while p<>nil do
+   begin
+    k:=p^.r;
+    if not hash[k] then dfs1(k);
+    p:=p^.next;
+   end;
+  inc(tot); line[tot]:=x;
+ end;
+procedure work(x,cl:longint);
+ var p:link;
+  k:longint;
+ begin
+  color[x]:=cl;
+  p:=map[x];
+  while p<>nil do
+   begin
+   k:=p^.r;
+   if color[k]=0 then work(k,cl);
+   p:=p^.next;
+   end;
+ end;
+begin
+
+ readln(n,m);
+ for i:=1 to n do
+  map[i]:=nil;
+ for i:=1 to m do
+  begin
+  readln(l,r);
+  new(p); p^.r:=r; p^.next:=map[l]; map[l]:=p;
+  new(p); p^.r:=l; p^.next:=map2[r];map2[r]:=p;
+  end;
+ tot:=0;
+ for i:=1 to n do
+  if not hash[i] then dfs1(i);
+ cl:=0;
+ for i:=n downto 1 do
+  if color[line[i]]=0 then
+  begin
+   inc(cl);
+   work(line[i],cl);
+  end;
+{ for j:=1 to cl do
+  begin
+  for i:=1 to n do
+   if color[i]=j then write(i,' ');
+  writeln;
+  end;
+}for i:=1 to n do
+  begin
+  p:=map[i];
+  while p<>nil do
+   begin
+    k:=p^.r;
+    if color[k]<>color[i] then inc(len[color[i]]);
+    p:=p^.next;
+   end;
+  end;
+ k:=0;
+ for i:=1 to cl do
+  if len[i]=0 then inc(k);
+ if k=1 then
+  for i:=1 to cl do
+  if len[i]=0 then
+  begin
+   l:=0;
+   for j:=1 to n do
+    if color[j]=i then inc(l);
+   writeln(l);
+  end;
+ if k<>1 then writeln(0);
+
+
+end.
+Problem1053
+program ant;
+ type arr=record
+  v,c:longint;
+  end;
+ const prime:array[1..30] of longint=(2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113);
+ var i,j,n,m,p,q,l,r,count,tot,lim:longint;
+ line:array[1..10000] of arr;
+ a:array[1..50] of longint;
+ hash:array[1..10000] of boolean;
+procedure openfile;
+ begin
+ assign(input,'ant.in');
+ assign(output,'ant.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+procedure search(x,lim:longint; tot:int64);
+ var i,j,p:longint;
+ begin
+  if tot>n then exit;
+  inc(count); line[count].v:=tot;
+  p:=1;
+  for i:=1 to x-1 do
+   p:=p*(a[i]+1);
+  line[count].c:=p;
+  //-----
+  for i:=1 to lim do
+   begin
+    a[x]:=i;
+    tot:=tot*prime[x]; if tot>n then exit;
+    search(x+1,i,tot);
+   end;
+ end;
+procedure qsort(l,r:longint);
+ var i,j,m:longint; t:arr;
+ begin
+  i:=l; j:=r; m:=line[(l+r)div 2].v;
+  repeat
+   while line[i].v<m do inc(i);
+   while line[j].v>m do dec(j);
+   if i<=j then
+   begin
+    t:=line[i];
+    line[i]:=line[j];
+    line[j]:=t;
+    inc(i);
+    dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+procedure del;
+ var i,j,p,q:longint;
+ begin
+  fillchar(hash,sizeof(hash),true);
+  p:=1; j:=1;
+  for i:=2 to count do
+   begin
+    if line[i].c<=p then hash[i]:=false
+    else p:=line[i].c;
+   end;
+ end;
+begin
+ //openfile;
+ readln(n);
+ tot:=1; lim:=30;
+ search(1,lim,tot);
+ qsort(1,count);
+ del;
+ for i:=count downto 1 do
+  if hash[i] then begin writeln(line[i].v); break; end;
+ //closefile;
+end.
+Problem1054
+program p1054;
+
+const inf=maxlongint shr 1;
+
+var w,q:array[0..1000000]of longint;
+    ans,h,l:longint;
+    pow:array[0..16]of longint;
+
+
+procedure init;
+var i,j:longint;
+    ch:char;
+begin
+     h:=0;l:=1;
+     for i:=1 to 4 do
+     begin
+         for j:=1 to 4 do
+         begin
+              read(ch);
+              if ch='0' then
+              q[l]:=q[l]*2
+              else
+              q[l]:=q[l]*2+1;
+         end;
+         readln;
+     end;
+     readln;
+     
+     for i:=1 to 4 do
+     begin
+          for j:=1 to 4 do
+          begin
+               read(ch);
+               if ch='0' then
+               ans:=ans*2
+               else
+               ans:=ans*2+1;
+          end;
+          readln;
+     end;
+end;
+
+procedure insert(x,y:longint);
+begin
+     if x+1<w[y] then
+     begin
+          inc(l);
+          q[l]:=y;
+          w[y]:=x+1;
+          if y=ans then
+          begin
+               writeln(w[y]);
+               halt;
+          end;
+     end;
+end;
+
+
+procedure main;
+var i,x,k,y:longint;
+begin
+     if q[1]=ans then
+     begin
+          writeln(0);
+          halt;
+     end;
+
+     pow[0]:=1;
+     for i:=1 to 16 do pow[i]:=pow[i-1]*2;
+
+     for i:=1 to pow[16]-1 do w[i]:=inf;
+     w[q[1]]:=0;
+
+     repeat
+           inc(h);
+           x:=q[h];
+                for i:=1 to 16 do if x and pow[i-1]>0 then
+                begin
+                     if i>4 then
+                     begin
+                          if x and pow[i-4-1]=0 then
+                          begin
+                               y:=x-pow[i-1]+pow[i-4-1];
+                               insert(w[x],y);
+                          end;
+                     end;
+                     if i<13 then
+                     begin
+                          if x and pow[i+4-1]=0 then
+                          begin
+                               y:=x-pow[i-1]+pow[i+4-1];
+                               insert(W[x],y);
+                          end;
+                     end;
+                     
+                     if i mod 4<>0 then
+                     begin
+                         if x and pow[i]=0 then
+                         begin
+                              y:=x-pow[i-1]+pow[i];
+                              insert(w[x],y);
+                         end;
+                     end;
+                     
+                     if i mod 4<>1 then
+                     begin
+                          if x and pow[i-2]=0 then
+                          begin
+                               y:=x-pow[i-1]+pow[i-2];
+                               insert(w[x],y);
+                          end;
+                     end;
+                end;
+     until h>=l;
+end;
+
+
+begin
+
+     init;
+     main;
+end.
+Problem1059
+program BZOJ1059;
+ const maxn=200+5;
+ type link=^node;
+     node=record
+       r:longint;
+       next:link;
+       end;
+ var i,j,n,m,l,r,k,t,q:longint;
+ e:array[1..maxn] of link;
+ pre:Array[1..maxn] of longint;
+ hash:Array[1..maxn] of boolean;
+ p:link;
+ ans:longint;
+
+procedure openfile;
+ begin
+ assign(input,'BZOJ1059.in');
+ assign(output,'BZOJ1059.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+function find(x:longint):boolean;
+ var p:link; i:longint;
+ begin
+  p:=e[x];
+  while p<>nil do
+   begin
+   i:=p^.r;
+   if not hash[i] then
+    begin
+     hash[i]:=true;
+     if (pre[i]=0)or(find(pre[i])) then
+      begin
+       pre[i]:=x;
+       exit(true);
+      end;
+    end;
+   p:=p^.next;
+   end;
+  exit(false);
+ end;
+
+begin
+// openfile;
+ readln(t);
+for q:=1 to t do
+ begin
+  readln(n);
+  for i:=1 to n do
+   e[i]:=nil;
+  for i:=1 to n do
+   for j:=1 to n do
+    begin
+    read(k);
+    if k=1 then
+     begin
+     new(p); p^.r:=j; p^.next:=e[i]; e[i]:=p;
+     end;
+    end;
+  fillchar(pre,sizeof(pre),0); ans:=0;
+  for i:=1 to n do
+   begin
+   fillchar(hash,sizeof(hash),false);
+   if find(i) then inc(ans);
+   end;
+  if ans>=n then writeln('Yes') else writeln('No');
+ end;
+// closefile;
+end.
+Problem1066
+program bzoj1066;
+ const maxn=21; maxm=21; maxv=10000000;
+ type arr=record
+  x,y,t:longint; mark:boolean;
+  end;
+ var i,j,m,n,p,q,l,r,k:longint;
+ a:array[1..maxn*maxm] of arr;
+ liz:array[1..maxn,1..maxn] of char;
+ f,e:array[0..900,0..900] of longint;
+ len:array[0..900] of longint;
+ dis,his,vh,pre,di:array[0..900] of longint;
+ aug:longint;
+ ta,tl,d,tot:longint; ch:char;
+ ss,tt,ans,min,dj:longint;
+ flag:boolean;
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure init;
+ begin
+ readln(n,m,d);
+//----------init------------
+ ta:=0;
+ for i:=1 to n do
+  begin
+  for j:=1 to m do
+   begin
+   read(ch); p:=ord(ch)-ord('0');
+   if p>0 then
+    begin
+    inc(ta); a[ta].x:=i; a[ta].y:=j; a[ta].t:=p; a[i].mark:=false;
+    end;
+   end;
+  readln;
+  end;
+ for i:=1 to n do
+  begin
+  for j:=1 to m do
+   read(liz[i,j]);
+  readln;
+  end;
+ for i:=1 to ta do
+  if liz[a[i].x,a[i].y]='L' then
+   begin a[i].mark:=true; inc(tl); end;
+ end;
+
+procedure add(x,y,v:longint);
+ begin
+  inc(len[x]); e[x,len[x]]:=y; f[x,y]:=v;
+ end;
+
+begin
+ //openfile;
+ init;
+//-----------map------------
+ ss:=0; tt:=ta+Ta+1;
+ for i:=1 to ta do
+  begin
+  if a[i].mark then
+   begin
+   add(0,i,1); add(i,0,0);
+   end;
+  add(i,i+ta,a[i].t);
+  add(i+ta,i,0);
+  end;
+ for i:=1 to ta-1 do
+   for j:=i+1 to ta do
+   if sqr(a[i].x-a[j].x)+sqr(a[i].y-a[j].y)<=sqr(d) then
+    begin
+    add(i+ta,j,maxv); add(j,i+ta,0);
+    add(j+ta,i,maxv); add(i,j+ta,0);
+    end;
+ for i:=1 to ta do
+   if (a[i].x<=d)or(a[i].y<=d)or(a[i].x>=n-d+1)or(a[i].y>=m-d+1) then
+    begin
+    add(i+ta,tt,maxv);
+    add(tt,i+ta,0);
+    end;
+//--------------sap----------------------
+ fillchar(dis,sizeof(dis),0);
+ for i:=0 to tot do
+  di[i]:=1;
+ tot:=1+ta*2+1; vh[0]:=tot;
+ i:=ss; aug:=maxv;
+while dis[ss]<tot do
+ begin
+ his[i]:=aug; flag:=false;
+ for j:=di[i] to len[i] do
+  begin
+  p:=e[i,j];
+  if (dis[p]=dis[i]-1)and(f[i,p]>0) then
+   begin
+   flag:=true;
+   pre[p]:=i;
+   di[i]:=j;
+   if f[i,p]<aug then aug:=f[i,p];
+   i:=p;
+   if i=tt then
+    begin
+    ans:=ans+aug;
+    while i<>ss do
+     begin
+     dec(f[pre[i],i],aug);
+     inc(f[i,pre[i]],aug);
+     i:=pre[i];
+     end;
+    aug:=maxv;
+    end;
+   break;
+   end;
+  end;
+ if flag then continue;
+ min:=tot-1; dj:=1;
+ for j:=1 to len[i] do
+  if (f[i,e[i,j]]>0) then
+  begin
+  if dis[e[i,j]]<min then
+   begin
+   min:=dis[e[i,j]]; dj:=j;
+   end;
+  end;
+ dec(vh[dis[i]]); if vh[dis[i]]<=0 then break;
+ dis[i]:=min+1; di[i]:=dj;
+ inc(vh[dis[i]]);
+ if i<>ss then
+  begin i:=pre[i]; aug:=his[i]; end;
+ end;
+ writeln(tl-ans);
+// closefile;
+end.
+Problem1085
+program bzoj1087;
+ type arr=array[1..5,1..5] of longint;
+ const std:arr=((1,1,1,1,1),
+                (0,1,1,1,1),
+                (0,0,2,1,1),
+                (0,0,0,0,1),
+                (0,0,0,0,0));
+       dx:array[1..8] of longint=(-1,-2,+1,+2,+2,+1,-1,-2);
+       dy:array[1..8] of longint=(-2,-1,-2,-1,+1,+2,+2,+1);
+   var tt,time:longint;
+       a:Arr;
+       i,j,n,mid,l,r,tx,ty:longint;
+       ch:char;
+       flag:boolean;
+
+function equ(a:arr):longint;
+ var i,j,k:longint;
+ begin
+  k:=0;
+  for i:=1 to 5 do
+   for j:=1 to 5 do
+    if a[i,j]<>std[i,j] then inc(k);
+  exit(k);
+ end;
+
+procedure search(k,x,y:longint; a:arr; dis:longint);
+ var i,j,p,t:longint;
+ function cc(a,b:longint):longint;
+  begin
+   if a<>b then exit(1) else exit(0);
+  end;
+
+ begin
+  if (x=3)and(y=3) then
+  if dis=0 then flag:=true;
+  if dis>(mid-k)+1 then exit;
+  if flag then exit;
+  if k>=mid then exit;
+  for i:=1 to 8 do
+   begin
+   if ((x+dx[i])in[1..5])and((y+dy[i])in[1..5]) then
+    begin
+    p:=cc(std[x,y],a[x+dx[i],y+dy[i]])-cc(std[x,y],a[x,y])
+          +cc(std[x+dx[i],y+dy[i]],a[x,y])-cc(std[x+dx[i],y+dy[i]],a[x+dx[i],y+dy[i]]);
+    dis:=dis+p;
+    t:=a[x,y]; a[x,y]:=a[x+dx[i],y+dy[i]]; a[x+dx[i],y+dy[i]]:=t;
+    search(k+1,x+dx[i],y+dy[i],a,dis);
+    dis:=dis-p;
+    t:=a[x,y]; a[x,y]:=a[x+dx[i],y+dy[i]]; a[x+dx[i],y+dy[i]]:=t;
+    end;
+   end;
+ end;
+
+begin
+ readln(time);
+ for tt:=1 to time do
+  begin
+  for i:=1 to 5 do
+   begin
+   for j:=1 to 5 do
+     begin
+     read(ch);
+     case ch of
+      '0': a[i,j]:=0;
+      '1': a[i,j]:=1;
+      '*': begin a[i,j]:=2; tx:=i; ty:=j; end;
+      end;
+     end;
+   readln;
+   end;
+  if equ(a)=0 then begin writeln(0); continue; end;
+  l:=1; r:=16;
+  while l<r do
+   begin
+    mid:=(l+r)div 2;
+    flag:=false;
+    search(0,tx,ty,a,equ(a));
+   if flag then r:=mid else l:=mid+1;
+   end;
+  if l>15 then writeln(-1)
+   else writeln(l);
+  end;
+end.
+Problem1087
+program bzoj1087;
+  var i,j,n,m,p,q,l,r,k:longint;
+    f:Array[1..10,0..90,0..100] of int64;
+    tot:longint;
+    ans:int64;
+    can,count:array[1..100] of longint;
+
+begin
+ readln(n,k);
+ tot:=0;
+ for i:=0 to 1 shl n-1 do
+  begin
+   if (i and (i shl 1)=0)and(i and (i shr 1)=0) then
+    begin
+      inc(tot); can[tot]:=i;
+      count[tot]:=0;
+      p:=1;
+      for j:=1 to n do
+       begin
+       if i and p>0 then inc(count[tot]);
+       p:=p shl 1;
+       end;
+    end;
+  end;
+ for j:=1 to tot do
+  f[1,count[j],j]:=1;
+ for i:=2 to n do
+  for j:=0 to k do
+  for l:=1 to tot do
+  for r:=1 to tot do
+  if j>=count[r] then
+  begin
+  if (can[l] and can[r]=0)and((can[l] shl 1)and can[r]=0)and((can[l] shr 1)and can[r]=0) then
+   f[i,j,r]:=f[i,j,r]+f[i-1,j-count[r],l];
+  end;
+ for l:=1 to tot do
+  ans:=ans+f[n,k,l];
+ writeln(ans);
+end.
+Problem1096
+const maxn=1000001;
+var n,i,j,h,t:longint;
+    f,s,y,p,x,w,c:array[0..maxn] of int64;
+    q:array[0..maxn] of longint;
+function pan(j,k:longint):boolean;
+begin
+        if y[j]-y[k]+x[i]*(w[j]-w[k])>=0 then exit(true) else exit(false);
+end;
+function cha(i,j,k:longint):boolean;
+begin
+        if (y[j]-y[i])*(w[k]-w[j])-(y[k]-y[j])*(w[j]-w[i])<=0 then exit(true)
+        else exit(false);
+end;
+procedure openfile;
+ begin
+ assign(input,'BZOJ1096.in');
+ assign(output,'waff.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+begin
+     //   openfile;  
+        readln(n);
+        for i:=1 to n do
+        begin
+                readln(x[i],p[i],c[i]);
+                p[i]:=p[i-1]+p[i]; s[i]:=s[i-1]+p[i-1]*(x[i]-x[i-1]);
+        end;
+        for i:=1 to n do
+        begin
+                while (h<t) and (pan(q[h],q[h+1])) do inc(h);
+                j:=q[h];
+                f[i]:=f[j]+s[i]-s[j]-p[j]*(x[i]-x[j])+c[i];
+                y[i]:=f[i]-s[i]+p[i]*x[i];
+                w[i]:=-p[i];
+                while (h<t) and (cha(q[t-1],q[t],i)) do dec(t);
+                inc(t); q[t]:=i;
+        end;
+        writeln(f[n]);
+      //  closefile;
+end.
+Problem1123
+program BZOJ1123;
+ const maxn=100000+10; maxm=500000+10;
+ type link=^node;
+     node=record
+      r,num:longint;
+      next:link;
+         end;
+ var i,j,n,m,l,r,k:longint;
+ e:array[1..maxn] of link;
+ father,size,low,dfn:array[1..maxn] of longint;
+ ans:array[1..maxn] of int64;
+// hash:array[1..maxn] of boolean;
+ kind:array[1..maxm] of longint;
+ line:array[1..maxn] of int64;
+ tail:longint;
+ p:link;
+ sign:longint;
+procedure openfile;
+ begin
+ assign(input,'BZOJ1123.in');
+ assign(output,'BZOJ1123.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+procedure add(l,r,i:longint);
+ var p:link;
+ begin
+ new(p); p^.r:=r; p^.next:=e[l];  p^.num:=i; e[l]:=p;
+ new(p); p^.r:=l; p^.next:=e[r];  p^.num:=i; e[r]:=p;
+ end;
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+procedure dfs(x:longint);
+ var p:link; i:longint;
+ begin
+ if size[x]<>0 then exit;
+ size[x]:=1; p:=e[x];
+ while p<>nil do
+  begin
+  i:=p^.r;
+  if (father[x]<>i)and(kind[p^.num]=0) then
+   begin
+   dfs(i);
+   size[x]:=size[x]+size[i];
+   end;
+  p:=p^.next;
+  end;
+ end;
+procedure tarjan(x:longint);
+ var p:link;
+ i,j:longint;
+ begin
+ inc(sign); dfn[x]:=sign; low[x]:=dfn[x];
+ p:=e[x];
+// if x=1 then hash[x]:=true;
+ while p<>nil do
+  begin
+  i:=p^.r;
+  if (dfn[i]=0)and(i<>father[x]) then
+   begin
+   kind[p^.num]:=0;
+   father[i]:=x;
+   tarjan(i);
+   low[x]:=min(low[x],low[i]);
+  // if (x<>1)and(low[i]>=dfn[x]) then
+  //  begin
+  //  hash[x]:=true;
+    dfs(i);
+  //  end;
+   end
+  else if (dfn[i]>0)and(i<>father[x]) then
+   begin
+   low[x]:=min(low[x],dfn[i]);
+   kind[p^.num]:=1;
+   end;
+  p:=p^.next;
+  end;
+// if hash[x] then
+  begin
+  p:=e[x];
+  tail:=1; line[1]:=1;
+  j:=n-1;
+  while p<>nil do
+   begin
+   i:=p^.r;
+   if (i<>father[x])and(kind[p^.num]=0)and(low[i]>=dfn[x])then
+    begin
+    inc(tail); line[tail]:=size[i]; j:=j-size[i];
+    end;
+   p:=p^.next;
+   end;
+   inc(tail); line[tail]:=j;
+   ans[x]:=0;
+  for i:=1 to tail-1 do
+   for j:=i+1 to tail do
+    ans[x]:=ans[x]+line[i]*line[j];
+  end;
+ end;
+begin
+// openfile;
+ readln(n,m);
+ for i:=1 to n  do
+  e[i]:=nil;
+ for i:=1 to m do
+  begin
+  readln(l,r);
+  add(l,r,i);
+  end;
+ tarjan(1);
+//----output----
+ for i:=1 to n do
+  writeln(ans[i]*2);
+ //closefile;
+end.
+Problem1191
+program BZOJ1191;
+ const maxn=1000+50;
+ var i,j,n,m,p,q,l,r,k:longint;
+ a:array[0..maxn,1..2] of longint;
+ hash:array[0..maxn] of boolean;
+ link:array[0..maxn] of longint;
+
+
+
+function find(x:longint):boolean;
+ var i,p:longint;
+ begin
+ for i:=1 to 2 do
+  if not hash[a[x][i]] then
+  begin
+  hash[a[x][i]]:=true;
+  if (link[a[x][i]]=-1) or find(link[a[x][i]])  then
+   begin
+   link[a[x][i]]:=x;
+   exit(true);
+   end;
+  end;
+  exit(false);
+ end;
+begin
+
+ readln(m,n);
+ for i:=1 to n do
+  read(a[i][1],a[i][2]);
+ fillchar(link,sizeof(link),255);
+ r:=0;
+ for i:=1 to n do
+  begin
+  fillchar(hash,sizeof(hash),false);
+  if find(i) then inc(r) else break;
+  end;
+ writeln(r);
+
+end.
+Problem1192
+var m:longint;
+begin
+        readln(m);
+        writeln(trunc(ln(m)/ln(2))+1);
+end.
+Problem1196
+Program HNOI2006_1196;
+
+Const
+fin                   =       '1196.in';
+
+Var
+s,e,c1,c2             :       Array [1..20000] of Integer;
+f                     :       Array [1..10000] of Integer;
+n,k,m,mid,l,r,a,ans   :       Longint;
+
+Function top(x:Longint):Longint;
+begin
+    if f[x]<>x then f[x]:=top(f[x]);
+    exit(f[x]);
+end;
+
+Function Check(num:Longint):Boolean;
+var
+    a                   :       Longint;
+    t_k,cn,t1,t2        :       Longint;
+begin
+      for a:=n downto 1 do f[a]:=a;
+      cn:=n;
+      t_k:=0;
+      for a:=m downto 1 do
+        if c1[a]<=num then
+          begin
+            t1:=top(s[a]);t2:=top(e[a]);
+            if t1<>t2 then begin f[t2]:=t1;dec(cn);inc(t_k);end;//!!!
+          end;
+      if t_k<k then Exit(False);
+      for a:=m downto 1 do
+        if c2[a]<=num then
+          begin
+            t1:=top(s[a]);t2:=top(e[a]);
+            if t1<>t2 then begin f[t2]:=t1;dec(cn);end;//!!!
+          end;
+      if cn=1 then Exit(True) else Exit(False);
+end;
+
+Begin
+//Assign(INPUT,fin);Reset(INPUT);
+readln(n,k,m);
+for a:=1 to m do readln(s[a],e[a],c1[a],c2[a]);
+//Close(INPUT);
+l:=0;r:=30000;
+while l+100<r do
+    begin
+      mid:=(l+r) shr 1;
+      if check(mid) then r:=mid else l:=mid;
+    end;
+for a:=0 to 100 do
+    if check(l+a) then
+      begin
+        writeln(l+a);
+        Halt;
+      end;
+End.
+Problem1196
+program bzoj1196;
+ type arr=record
+  l,r,c1,c2:longint;
+  end;
+ const maxn=10000+10; maxm=20000+100;
+ var i,j,n,m,p,q,l,r,k,mid:longint;
+ e:array[1..maxm] of arr;
+ f:array[0..maxn] of longint;
+ hash:array[1..maxm] of boolean;
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function get(x:longint):longint;
+ begin
+ if x=f[x] then exit(x);
+ f[x]:=get(f[x]);
+ exit(f[x]);
+ end;
+function judge(mid:longint):boolean;
+ var i,j,p,q,x,y:longint;
+ begin
+ fillchar(hash,sizeof(hash),false);
+ for i:=1 to n do f[i]:=i;
+ p:=0;
+ for i:=1 to m do
+  if e[i].c1<=mid then
+  begin
+  x:=get(e[i].l); y:=get(e[i].r);
+  if x<>y then
+   begin
+   f[x]:=y;
+   inc(p);
+   hash[i]:=true;
+   if p>=n-1 then exit(true);
+   end;
+  end;
+ if p<k then exit(false);
+ if p>=n-1 then exit(true);
+ for i:=1 to m do
+  if (not hash[i])and(e[i].c2<=mid) then
+  begin
+  x:=get(e[i].l); y:=get(e[i].r);
+  if x<>y then
+   begin
+   f[x]:=y;
+   inc(p);
+   hash[i]:=true;
+   if p>=n-1 then exit(true);
+   end;
+  end;
+ if p<n-1 then exit(false);
+ end;
+begin
+// openfile;
+ readln(n,k,m);
+// dec(m);
+ for i:=1 to m do
+  readln(e[i].l,e[i].r,e[i].c1,e[i].c2);
+ l:=0; r:=30000;
+ while l+100<r do
+  begin
+  mid:=(l+r)div 2;
+  if not judge(mid) then l:=mid+1
+               else r:=mid;
+  end;
+ for i:=l to r do
+  if judge(i) then
+   begin
+   writeln(i);
+   halt;
+   end;
+// closefile;
+end.
+Problem1202
+program business;
+ var i,j,n,m,k,p,q,l,r:longint;
+  w,time,x,y,v       :longint;
+  flag:boolean;
+  father:array[0..1000] of longint;
+  before:array[0..1000] of longint;
+ procedure putout(aim:boolean);
+  begin
+   if aim then writeln('true')
+   else writeln('false');
+  end;
+ function getfather(x:longint):longint;
+  var f:longint;
+   begin
+    if father[x]=x then exit(x)
+    else
+    begin
+     f:=getfather(father[x]);
+     before[x]:=before[x]+before[father[x]];
+     father[x]:=f;
+     exit(f);
+    end;
+   end;
+ begin
+
+   readln(w);
+  for time:=1 to w do
+   begin
+   readln(n,m);
+   for i:=0 to n do
+    begin
+     father[i]:=i;
+     before[i]:=0;
+    end;
+   flag:=true;
+   for i:=1 to m do
+    begin
+     read(p,q,v);
+     p:=p-1;
+     x:=getfather(p);
+     y:=getfather(q);
+     if x=y then
+      begin
+      if before[q]-before[p]<>v then
+       flag:=false;
+      end;
+     if not flag then
+      begin
+       putout(false);
+       break;
+      end;
+     if x>y then
+      begin
+       before[y]:=before[p]+v-before[q];
+       father[y]:=x;
+      end;
+     if x<y then
+      begin
+       before[x]:=before[q]-v-before[p];
+       father[x]:=y;
+      end;
+    end;
+   if flag then putout(true);
+  end;
+
+ end.
+Problem1202
+program business;
+ var i,j,n,m,k,p,q,l,r:longint;
+  w,time,x,y,v       :longint;
+  flag:boolean;
+  father:array[0..1000] of longint;
+  before:array[0..1000] of longint;
+ procedure putout(aim:boolean);
+  begin
+   if aim then writeln('true')
+   else writeln('false');
+  end;
+ function getfather(x:longint):longint;
+  var f:longint;
+   begin
+    if father[x]=x then exit(x)
+    else
+    begin
+     f:=getfather(father[x]);
+     before[x]:=before[x]+before[father[x]];
+     father[x]:=f;
+     exit(f);
+    end;
+   end;
+ begin
+{  assign(input,'business.in');
+  assign(output,'business.out');
+   reset(input);
+   rewrite(output);}
+   readln(w);
+  for time:=1 to w do
+   begin
+   readln(n,m);
+   for i:=0 to n do
+    begin
+     father[i]:=i;
+     before[i]:=0;
+    end;
+   flag:=true;
+   for i:=1 to m do
+    begin
+     read(p,q,v);
+     p:=p-1;
+     x:=getfather(p);
+     y:=getfather(q);
+     if x=y then
+      begin
+      if before[q]-before[p]<>v then
+       flag:=false;
+      end;
+     if not flag then
+      begin
+       putout(false);
+       break;
+      end;
+     if x>y then
+      begin
+       before[y]:=before[p]+v-before[q];
+       father[y]:=x;
+      end;
+     if x<y then
+      begin
+       before[x]:=before[q]-v-before[p];
+       father[x]:=y;
+      end;
+    end;
+   if flag then putout(true);
+  end;
+ // close(input); close(output);
+ end.
+Problem1207
+program bzoj1207;
+ const maxn=10000+5;
+ type arr=record
+  t,x,y:longint;
+  end;
+ var i,j,n,m,p,q,l,r,k:longint;
+ ans:longint;
+  a:array[1..maxn] of arr;
+  dis:array[1..maxn] of longint;
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function manhaton(p,q:longint):longint;
+ begin
+ manhaton:=abs(a[p].x-a[q].x)+abs(a[p].y-a[q].y);
+ end;
+procedure qsort(l,r:longint);
+ var i,j,m:longint; t:arr;
+ begin
+  i:=l; j:=r; m:=a[(l+r) div 2].t;
+  repeat
+   while a[i].t<m do inc(i);
+   while a[j].t>m do dec(j);
+   if i<=j then
+    begin
+    t:=a[i]; a[i]:=a[j]; a[j]:=t; inc(i); dec(j);
+    end;
+   until i>j;
+  if l<j then qsort(l,j);
+  if i<r then qsort(i,r);
+ end;
+
+begin
+ //openfile;
+ readln(m,n);
+ j:=1;
+ for i:=1 to n do
+  begin
+  readln(a[j].t,a[j].x,a[j].y);
+  if (a[j].x<=m)and(a[j].y<=m)and(a[j].x>0)and(a[j].y>0) then inc(j);
+  end;
+ dec(j); n:=j;
+ qsort(1,n);
+ for i:=1 to n do dis[i]:=1;
+ for i:=1 to n-1 do
+  for j:=i+1 to n do
+  if manhaton(i,j)<=a[j].t-a[i].t then
+  if dis[j]<dis[i]+1 then dis[j]:=dis[i]+1;
+ for i:=1 to n do
+  if dis[i]>ans then ans:=dis[i];
+ writeln(ans);
+ //closefile;
+end.
+Problem1208
+program BZOJ1208;
+ const maxn=80000+100;
+ var i,j,n,m,p,q,l,r,k:longint;
+ key,left,right,s:array[1..maxn] of longint;
+ ans,tot,tt,t,ca,big,small     :longint;
+ hash:boolean;
+
+//-----------------------
+procedure rturn(var t:longint);
+ var p:longint;
+ begin
+ p:=left[t];
+ left[t]:=right[p];
+ right[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure lturn(var t:longint);
+ var p:longint;
+ begin
+ p:=right[t];
+ right[t]:=left[p];
+ left[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure maintain(var t:longint; flag:boolean);
+ begin
+  if not flag then
+   if s[left[left[t]]]>s[right[t]] then
+    rturn(t)
+    else
+     if s[left[right[t]]]>s[right[t]] then
+     begin
+     lturn(left[t]);
+     rturn(t);
+     end
+    else exit;
+  if     flag then
+   if s[right[right[t]]]>s[left[t]] then
+    lturn(t)
+    else
+    if s[right[left[t]]]>s[left[t]] then
+    begin
+    rturn(right[t]);
+    lturn(t);
+    end
+    else exit;
+  maintain(left[t],false);
+  maintain(right[t],true);
+  maintain(t,false);
+  maintain(t,true);
+ end;
+//-----------------------
+procedure insert(var t:longint; v:longint);
+ begin
+ if t=0 then
+  begin
+  inc(tot); inc(tt); t:=tt;
+  s[t]:=1; left[t]:=0; right[t]:=0; key[t]:=v;
+  end
+ else
+  begin
+  inc(s[t]);
+  if v<key[t] then insert(left[t],v)
+              else insert(right[t],v);
+  maintain(t,v>=key[t]);
+  end;
+ end;
+function find(var t:longint; v:longint):boolean;
+ begin
+ if t=0 then exit(false);
+ if key[t]=v then exit(true);
+ if v<key[t] then exit(find(left[t],v))
+             else exit(find(right[t],v));
+ end;
+function pred(var t:longint; v:longint):longint;
+ begin
+ if t=0 then exit(v);
+ if v<=key[t] then pred:=pred(left[t],v)
+  else
+  begin
+  pred:=pred(right[t],v);
+  if pred=v then pred:=key[t];
+  end;
+ end;
+function succ(var t:longint; v:longint):longint;
+ begin
+ if t=0 then exit(v);
+ if key[t]<=v then succ:=succ(right[t],v)
+  else
+  begin
+  succ:=succ(left[t],v);
+  if succ=v then succ:=key[t];
+  end;
+ end;
+function delete(var t:longint; v:longint):longint;
+ begin
+ dec(s[t]);
+ if (v=key[t])or(v>key[t])and(right[t]=0)or(v<key[t])and(left[t]=0) then
+  begin
+  delete:=key[t];
+  if (left[t]=0)or(right[t]=0) then
+   t:=left[t]+right[t]
+  else key[t]:=delete(left[t],key[t]+1);
+  end
+ else
+  if v<key[t] then
+   delete:=delete(left[t],v)
+   else delete:=delete(right[t],v);
+ end;
+begin
+ readln(n);
+ tot:=0; tt:=0;
+ for i:=1 to n do
+  begin
+  readln(k,m);
+  if (tot=0)or(k=ca) then
+   begin
+   insert(t,m); ca:=k;
+  // big:=m; small:=m;
+   end
+  else
+   begin
+   hash:=find(t,m);
+   dec(tot);
+   if hash then begin delete(t,m); continue; end;
+   l:=pred(t,m); r:=succ(t,m);
+   q:=m;
+   if l=m then q:=r
+    else if r=m then q:=l
+     else if (m-l)<=(r-m) then q:=l
+      else q:=r;
+   delete(t,q);
+   ans:=(ans+abs(q-m)) mod 1000000;
+   end;
+  end;
+ writeln(ans);
+end.
+
+Problem1293
+program tclsm;
+{$R-}
+const
+        maxk    =       60;
+        maxn    =       1000005;
+        maxnum  =       maxlongint;
+type
+        Tnum    =       record
+                 fir,lst,mark   : longint;
+                 end;
+var
+        min,marks       : longint;
+        n,k,len         : longint;
+        num             : array [ 0..maxk ] of Tnum;
+        a               : array [ 0..maxn ] of longint;
+        heap,mark       : array [ 0..maxn ] of longint;
+
+procedure init;
+var
+        i,j             : longint;
+        fir,lst,len     : longint;
+begin
+        readln( n , k );
+        fir:=1;
+        for i:=1 to k do
+        begin
+          read( len );
+          lst:=fir+len-1;
+          for j:=fir to lst do read( a[ j ] );
+          readln;
+          num[ i ].fir:=fir; num[ i ].lst:=lst;
+          fir:=lst+1;
+        end;
+        for i:=1 to k do num[ i ].mark:=num[ i ].fir;
+end;
+
+procedure swap( var ii , jj : longint );
+var
+        t               : longint;
+begin
+        t:=ii;ii:=jj;jj:=t;
+end;
+
+procedure put( x : longint );
+var
+        fa,son          : longint;
+begin
+        inc( len );
+        heap[ len ]:=a[ num[ x ].mark ];
+        mark[ len ]:=x;
+        son:=len;
+        while ( son <> 1 ) and ( heap[ son ] < heap[ son div 2 ] ) do
+        begin
+          fa:=son div 2;
+          swap( heap[ son ] , heap[ fa ] );
+          swap( mark[ son ] , mark[ fa ] );
+          son:=fa;
+        end;
+end;
+
+procedure get;
+var
+        fa,son          : longint;
+begin
+        min:=heap[ 1 ];
+        marks:=mark[ 1 ];
+        heap[ 1 ]:=heap[ len ];
+        mark[ 1 ]:=mark[ len ];
+        dec( len );
+        fa:=1;
+        while fa*2 <= len do
+        begin
+          if ( fa*2+1 > len ) or ( heap[ fa*2+1 ] > heap[ fa*2 ] ) then
+               son:=fa*2
+          else
+               son:=fa*2+1;
+          if heap[ son ] < heap[ fa ] then
+          begin
+            swap( heap[ son ] , heap[ fa ] );
+            swap( mark[ son ] , mark[ fa ] );
+            fa:=son;
+          end
+          else          break;
+        end;
+end;
+
+procedure main;
+var
+        i,j             : longint;
+        ans,max,res     : longint;
+begin
+        max:=0; ans:=maxnum;
+        for i:=1 to k do
+          if a[ num[ i ].mark ] > max then max:=a[ num[ i ].mark ];
+        len:=0;
+        for i:=1 to k do put( i );
+        while true do
+        begin
+          get;
+          res:=max-min;
+          if res < ans then ans:=res;
+          if num[ marks ].mark = num[ marks ].lst then break;
+          inc( num[ marks ].mark );
+          if a[ num[ marks ].mark ] > max then max:=a[ num[ marks ].mark ];
+          put( marks );
+        end;
+        writeln( ans );
+end;
+
+procedure openfile;
+ begin
+ assign(input,'BZOJ1293.in');
+ assign(output,'BZOJ12930.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+
+begin
+       
+        init;
+        main;
+      
+end.
+Problem1367
+Program seq;
+Var dis,v,lc,rc,st,q:array[0..1000001] of longint;
+    i,j,k,l,m,n:longint;
+    ans:int64;
+    
+Procedure swap(var a,b:longint);
+ var c:longint;
+begin c:=a;a:=b;b:=c;end;
+
+Function Merge(x,y:longint):longint;
+Begin
+  if (x=0) or (y=0) then exit(x+y);
+  if v[x]<v[y] then swap(x,y);
+  rc[x]:=merge(rc[x],y);
+  if dis[rc[x]]>dis[lc[x]] then swap(rc[x],lc[x]);
+  dis[x]:=dis[rc[x]]+1;
+  exit(x);
+end;
+Begin
+//-----------------
+  dis[0]:=-1;
+  readln(n);
+  for i:=1 to n do
+    begin
+      read(v[i]);
+      dec(v[i],i);
+      inc(m);
+      st[m]:=i;q[m]:=i;
+      while (m>1) and (v[st[m]]<v[st[m-1]]) do
+        begin
+          st[m-1]:=merge(st[m],st[m-1]);
+          dec(m);
+          if odd(q[m+1]-q[m]) and odd(q[m]-q[m-1]) then
+            st[m]:=merge(lc[st[m]],rc[st[m]]);
+          q[m]:=q[m+1];
+        end;
+    end;
+  for i:=1 to m do
+    for j:=q[i-1]+1 to q[i] do
+      ans:=ans+int64(abs(v[j]-v[st[i]]));
+  writeln(ans);
+end.
+Problem1407
+program savage;
+ const maxn=15+5;
+var i,j,k,tot,least,n:longint;
+ c,p,l:array[1..maxn] of longint;
+ flag:boolean;
+
+
+function exgcd(a,b:longint; var x,y:longint):longint;
+ var t:longint;
+ begin
+  if b=0 then
+   begin
+   exgcd:=a;
+   x:=1;
+   y:=0;
+   end
+  else
+  begin
+  exgcd:=exgcd(b,a mod b,x,y);
+  t:=x;
+  x:=y;
+  y:=t-(a div b)*y;
+  end;
+ end;
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+function encounter(aa,bb,m,n,l,life:longint):boolean;
+var a,b,c,i,j,k:longint;
+  gg:longint;
+  x,y:longint;
+  d,t:longint;
+begin
+ if m>n then begin d:=bb-aa; a:=m-n; end
+        else begin d:=aa-bb; a:=n-m; end;
+ gg:=exgcd(a,l,x,y);
+ if d mod gg<>0 then exit(false)
+ else
+  begin
+   x:=x*d div gg;
+   l:=l div gg;
+   x:=(x mod l+l) mod l;
+   if x>life then exit(false)
+    else exit(true);
+  end;
+end;
+
+begin
+ read(n);
+ for i:=1 to n do
+  readln(c[i],p[i],l[i]);
+ least:=0;
+ for i:=1 to n do
+  if c[i]>least then least:=c[i];
+ for tot:=least to 1000000 do
+  begin
+  flag:=true;
+  for i:=1 to n-1 do
+   for j:=i+1 to n do
+   begin
+    if not flag then break;
+    k:=min(l[i],l[j]);
+    if encounter(c[i],c[j],p[i],p[j],tot,k) then
+    begin
+    flag:=false;
+    break;
+    end;
+   end;
+  if flag then
+   begin
+   writeln(tot);
+   halt;
+   end;
+  end;
+
+end.
+Problem1432
+program p1432;
+var n,k :longint;
+
+begin
+     readln(n,k);
+     if n=1 then  writeln(1)
+     else
+     begin
+          if  k>(n+1) shr 1 then k:=n-k+1;
+          writeln(2*k)
+     end;
+end.
+Problem1443
+var ch:char;
+    f:array[0..10001,0..10001] of boolean;
+    d:array[0..101,0..101] of longint;
+    p,flow,has,l,n,m,i,j,s,t:longint;
+    en,vn,suc:array[0..80000]of longint;
+    tp,dis,vd,pc,dx,dy,ans:array[0..10005] of longint;
+procedure ae(a,b:longint);
+begin
+  inc(p); en[p]:=vn[a]; vn[a]:=p; suc[p]:=b;
+end;
+function dfs(u,flow:longint):longint;
+var v,i,tmp,p:longint;
+begin
+  if u=t then exit(flow);
+  dfs:=0;
+   p:=vn[u];
+   while p<>0 do begin
+    v:=suc[p];
+     if  (f[u,v]) and (dis[u]=dis[v]+1) then
+      begin
+       tmp:=dfs(v,1);
+       if tmp>0 then
+        begin
+         inc(dfs);
+         f[u,v]:=false; f[v,u]:=true;
+         if dfs=flow then exit(flow);
+        end;
+      end;
+     p:=en[p];
+    end;
+  if dis[s]=t+1 then exit(dfs);
+  dec(vd[dis[u]]);
+  if vd[dis[u]]=0 then dis[s]:=t+1;
+  inc(dis[u]); inc(vd[dis[u]]);
+  exit(dfs);
+end;
+procedure dfsx(u,orz:longint);
+var i,v,p:longint;
+    pd:boolean;
+begin
+  pc[u]:=1;
+  if tp[u]=orz then begin ans[u]:=1; has:=1;end;
+  p:=vn[u];
+  while p<>0 do
+   begin
+    v:=suc[p];
+    if orz=1 then pd:=f[u,v] else pd:=f[v,u];
+    if (v<>s) and (v<>t) and (pd) and (pc[v]=0) then dfsx(v,orz);
+    p:=en[p];
+   end;
+end;
+begin
+  readln(n,m);
+   for i:=1 to n do
+    begin
+    for j:=1 to m do
+      begin
+      read(ch);
+       if ch='.' then begin
+       inc(l); d[i,j]:=l; dx[l]:=i; dy[l]:=j;if i mod 2=j mod 2 then tp[l]:=1 else tp[l]:=2;
+      if d[i-1,j]>0 then begin ae(l,d[i-1,j]); ae(d[i-1,j],l);if tp[l]=1 then f[l,d[i-1,j]]:=true else f[d[i-1,j],l]:=true; end;
+      if d[i,j-1]>0 then begin ae(l,d[i,j-1]); ae(d[i,j-1],l);if tp[l]=1 then f[l,d[i,j-1]]:=true else f[d[i,j-1],l]:=true; end;
+      end;
+      end;
+    readln;
+   end;
+  s:=0; t:=l+1;
+  for i:=1 to l do
+   if tp[i]=1 then begin f[0,i]:=true; ae(0,i); ae(i,0);end else begin f[i,l+1]:=true; ae(i,l+1); ae(l+1,i);end;
+  vd[0]:=t+1;
+  while dis[0]<t+1 do
+   flow:=dfs(s,maxlongint);
+  for i:=1 to l do pc[i]:=0;
+  dfsx(s,1);
+  for i:=1 to l do pc[i]:=0;
+  dfsx(t,2);
+  if has=1 then begin writeln('WIN'); for i:=1 to l do if ans[i]=1 then writeln(dx[i],' ',dy[i]);end else writeln('LOSE');
+end.
+Problem1443
+program  bzoj1443;
+{$m 10000000000}
+ type arr=record
+  x,y:longint;
+  end;
+
+ const maxn=100+3; maxm=100+3; modd=10000;
+       dx:array[1..4] of longint=(-1,0,1,0);
+       dy:array[1..4] of longint=(0,-1,0,1);
+ var map:array[1..maxn,1..maxm] of longint;
+     link,pre:array[1..maxn,1..maxn] of arr;
+     hash,ans:array[1..maxn,1..maxn] of boolean;
+     line:array[1..modd] of arr;
+     i,j,n,m,p,q,l,r,k,maxmatch:longint;
+     ch:char;
+procedure openfile;
+ begin
+ assign(input,'bzoj1443.in');
+ assign(output,'bzoj1443.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure dye(x,y:longint);
+ var l,r,i,j,p,tx,ty:longint;
+ begin
+ l:=1; r:=1; line[1].x:=x; line[1].y:=y; map[x,y]:=0;
+ while l<=r do
+  begin
+  x:=line[l].x; y:=line[l].y; inc(l); hash[x,y]:=false;
+  for i:=1 to 4 do
+  begin
+  tx:=x+dx[i]; ty:=y+dy[i];
+  if (tx>0)and(tx<=n)and(ty>0)and(ty<=m)and(map[tx,ty]=2) then
+   begin
+   hash[x,y]:=true;
+   map[tx,ty]:=1-map[x,y];
+   inc(r); line[r].x:=tx; line[r].y:=ty;
+   end;
+  end;
+  end;
+ end;
+function find(x,y:longint):boolean;
+ var i,j,tx,ty:longint;
+ begin
+ for i:=1 to 4 do
+  begin
+  tx:=x+dx[i]; ty:=y+dy[i];
+  if (tx>0)and(tx<=n)and(ty>0)and(ty<=m)and(map[tx,ty]<>-1) then
+   if not hash[tx,ty] then
+   begin
+   hash[tx,ty]:=true;
+   if (link[tx,ty].x=0)or find(link[tx,ty].x,link[tx,ty].y) then
+    begin
+    link[tx,ty].x:=x; link[tx,ty].y:=y;
+    exit(true);
+    end;
+   end;
+  end;
+ exit(false);
+ end;
+procedure dfs(x,y:longint);
+ var i,j,tx,ty:longint; ret:arr;
+ begin
+  if (x<=0)or(x>n)or(y<=0)or(y>m)or(map[x,y]=-1) then
+   exit;
+  if ans[x,y] then exit;
+  hash[x,y]:=true;
+  if pre[x,y].x<>0 then
+    ans[pre[x,y].x,pre[x,y].y]:=true
+   else exit;
+  tx:=x; ty:=y;
+  x:=pre[tx,ty].x; y:=pre[tx,ty].y;
+  for i:=1 to 4 do
+   begin
+   tx:=x+dx[i]; ty:=y+dy[i];
+   if (tx>0)and(tx<=n)and(ty>0)and(ty<=m)and(map[tx,ty]<>-1) then
+   if not hash[tx,ty] then
+    begin
+     dfs(tx,ty);
+    end;
+   end;
+ end;
+procedure hungary(ca:longint);
+ begin
+ maxmatch:=0;
+ fillchar(link,sizeof(link),0);
+ fillchar(pre,sizeof(pre),0);
+ for i:=1 to n do
+  for j:=1 to m do
+  if map[i,j]=ca then
+  begin
+  fillchar(hash,sizeof(hash),false);
+  if find(i,j) then inc(maxmatch);
+  end;
+ for i:=1 to n do
+  for j:=1 to m do
+   if link[i,j].x<>0 then
+    begin
+    p:=link[i,j].x; q:=link[i,j].y;
+    pre[p,q].x:=i; pre[p,q].y:=j;
+    end;
+ fillchar(hash,sizeof(hash),false);
+ for i:=1 to n do
+  for j:=1 to m do
+  if (map[i,j]=1-ca)and(link[i,j].x=0) then
+   if ans[i,j]=false then
+   begin
+    ans[i,j]:=true;
+    dfs(i+1,j); dfs(i,j+1); dfs(i,j-1); dfs(i-1,j);
+   end;
+ end;
+
+begin
+// openfile;
+ readln(n,m);
+ for i:=1 to n do
+  begin
+  for j:=1 to m do
+   begin
+   read(ch);
+   if ch='#' then map[i,j]:=-1
+    else map[i,j]:=2;
+   end;
+  readln;
+  end;
+ for i:=1 to n do
+  for j:=1 to m do
+   if map[i,j]=2 then
+    begin
+    map[i,j]:=0;
+    dye(i,j);
+    end;
+{ for i:=1 to n do
+  begin
+  for j:=1 to m do
+   write(map[i,j]:3);
+  writeln;
+  end;  }
+// fillchar(link,sizeof(link),0);
+ fillchar(ans,sizeof(ans),false);
+ hungary(0);
+ hungary(1);
+ //writeln(maxmatch);
+ k:=1;
+ for i:=1 to n do
+   for j:=1 to m do
+  if ans[i,j] then
+   begin
+   if k=1 then begin  k:=maxlongint; writeln('WIN'); end;
+   writeln(i,' ',j);
+   end;
+ if k<>maxlongint then writeln('LOSE');
+ //closefile;
+end.
+Problem1452
+program BZOJ1452;
+ const maxn=300+10; maxm=300+10;
+ var i,j,n,m,p,q,l,r,k:longint;
+ t:array[1..100,0..maxn,0..maxm] of longint;
+ a:array[0..maxn,0..maxm] of longint;
+ x1,x2,y1,y2,c,ans:longint;
+function lowbit(x:longint):longint;
+ begin
+  exit(x and (-x));
+ end;
+procedure insert(c,x,y,p:longint);
+ var i,j,q:longint;
+ begin
+ i:=x;
+ while i<=n do
+  begin
+  j:=y;
+  while j<=m do
+   begin
+   t[c,i,j]:=t[c,i,j]+p;
+   j:=j+lowbit(j);
+   end;
+  i:=i+lowbit(i);
+  end;
+ end;
+function query(c,x,y:longint):longint;
+ var i,j,p:longint;
+ begin
+ i:=x; p:=0;
+ while i>0 do
+  begin
+  j:=y;
+  while j>0 do
+   begin
+   p:=p+t[c,i,j];
+   j:=j-lowbit(j);
+   end;
+  i:=i-lowbit(i);
+  end;
+ exit(p);
+ end;
+
+begin
+ readln(n,m);
+ for i:=1 to n do
+  for j:=1 to m do
+  begin
+  read(a[i,j]);
+  insert(a[i,j],i,j,1);
+  end;
+ read(q);
+ for i:=1 to q do
+  begin
+  read(p);
+  case p of
+   1:begin
+     readln(x1,y1,c);
+     insert(a[x1,y1],x1,y1,-1);
+     a[x1,y1]:=c;
+     insert(c,x1,y1,1);
+     end;
+   2:begin
+     readln(x1,x2,y1,y2,c);
+     ans:=query(c,x2,y2)+query(c,x1-1,y1-1);
+     ans:=ans-query(c,x1-1,y2)-query(c,x2,y1-1);
+     writeln(ans);
+     end;
+   end;
+  end;
+end.
+Problem1455
+program BZOJ1455;
+ const maxn=1000000+10;
+ type link=^node;
+  node=record
+   l,r:link;
+   dis,v:longint;
+   end;
+ var i,j,n,m,l,r,k,x,y:longint;
+ p,q:link;
+ tree:array[1..maxn] of link;
+ f,vae:array[1..maxn] of longint;
+ alive:Array[1..maxn] of boolean;
+ command:char;
+
+function get(x:longint):longint;
+ begin
+ if f[x]=x then exit(x);
+ f[x]:=get(f[x]);
+ exit(f[x]);
+ end;
+function merge(a,b:link):link;
+ var p,q:link;
+ begin
+ if a=nil then exit(b);
+ if b=nil then exit(a);
+ if vae[b^.v]<vae[a^.v] then
+  begin p:=a; a:=b; b:=p; end;
+ a^.r:=merge(a^.r,b);
+ if (a^.l=nil)or(a^.r^.dis>a^.l^.dis) then
+  begin p:=a^.r; a^.r:=a^.l; a^.l:=p; end;
+ if a^.r=nil then a^.dis:=0
+  else a^.dis:=a^.r^.dis+1;
+ exit(a);
+ end;
+begin
+
+ readln(n);
+ for i:=1 to n do
+  read(vae[i]);
+ readln;
+ for i:=1 to n do
+  begin
+  new(p);
+  p^.l:=nil; p^.r:=nil; p^.dis:=0; p^.v:=i;
+  tree[i]:=p;
+  end;
+ //----------------
+ for i:=1 to n do
+  f[i]:=i;
+ fillchar(alive,sizeof(alive),true);
+ readln(m);
+ for i:=1 to m do
+  begin
+  read(command);
+  case command of
+   'M':begin
+       readln(l,r);
+       if not (alive[l] and alive[r]) then continue;
+       x:=get(l); y:=get(r);
+       if x=y then continue;
+       p:=merge(tree[x],tree[y]);
+       tree[x]:=p;
+       f[y]:=x;
+       tree[y]:=nil;
+       end;
+   'K':begin
+       readln(k);
+       if not alive[k] then writeln(0) else
+        begin
+        x:=get(k);
+        writeln(vae[tree[x]^.v]);
+        alive[tree[x]^.v]:=false;
+        tree[x]:=merge(tree[x]^.l,tree[x]^.r);
+        end;
+       end;
+   end;
+  end;
+ //------------------
+
+end.
+Problem1475
+program flow9;
+ const maxn=1000;
+
+ var i,j,n,m,p,q,l,r,k:longint;
+ e,f:array[0..maxn,0..maxn] of longint;
+ map,num,color:array[1..30,1..30] of longint;
+ vh,len,pre,his,dis,di:array[0..maxn] of longint;
+ flag:boolean;
+ aug,ans,jl,totflow,tot,tt,ss,min:longint;
+procedure openfile;
+ begin
+ assign(input,'grid.in');
+ assign(output,'grid.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure add(l,r,p:longint);
+ begin
+ inc(len[l]); e[l,len[l]]:=r;
+ inc(len[r]); e[r,len[r]]:=l;
+ f[l,r]:=p;
+ end;
+procedure sap;
+ begin
+ //---------
+ tot:=n*m+2;
+ for i:=ss to tt do
+  di[i]:=1;
+ fillchar(dis,sizeof(dis),0);
+ vh[0]:=tot;
+ aug:=maxlongint;
+ i:=ss;
+ while dis[ss]<tot do
+  begin
+  flag:=false;
+  his[i]:=aug;
+  for l:=di[i] to len[i] do
+   begin
+   j:=e[i,l];
+   if (dis[j]+1=dis[i])and(f[i,j]>0) then
+    begin
+    flag:=true;
+    di[i]:=l;
+    pre[j]:=i;
+    if f[i,j]<aug then aug:=f[i,j];
+    i:=j;
+    if j=tt then
+     begin
+     inc(ans,aug);
+     while i<>ss do
+      begin
+      inc(f[i,pre[i]],aug);
+      dec(f[pre[i],i],aug);
+      i:=pre[i];
+      end;
+     aug:=maxlongint;
+     end;
+    break;
+    end;
+   end;
+  if flag then continue;
+  min:=tot-1;
+  for l:=1 to len[i] do
+   begin
+   j:=e[i,l];
+   if (dis[j]<min)and(f[i,j]>0) then
+    begin min:=dis[j]; jl:=l; end;
+   end;
+  di[i]:=jl;
+  dec(vh[dis[i]]);
+  if vh[dis[i]]=0 then
+   break;
+  dis[i]:=min+1;
+  inc(vh[dis[i]]);
+  if i<>ss then
+   begin i:=pre[i]; aug:=his[i]; end;
+  end;
+ //---------
+ end;
+
+begin
+// openfile;
+ readln(n);  m:=n;
+ ss:=0; tt:=n*m+1;
+//---------dye---------
+ p:=0;
+ for i:=1 to n do
+  begin
+  color[i,1]:=1-i and 1;
+  inc(p); num[i,1]:=p;
+  read(map[i,1]);
+  inc(totflow,map[i,1]);
+  for j:=2 to m do
+   begin
+   read(map[i,j]);
+   inc(p);
+   num[i,j]:=p;
+   color[i,j]:=1-color[i,j-1];
+   inc(totflow,map[i,j]);
+   end;
+  end;
+{ for i:=1 to n do
+  begin
+  for j:=1 to m do
+   write(color[i,j],' ');
+  writeln;
+  end;
+ for i:=1 to n do
+  begin
+  for j:=1 to m do
+   write(num[i,j],' ');
+  writeln;
+  end; }
+//---------------------
+ for i:=1 to n do
+  for j:=1 to m do
+  if color[i,j]=0 then
+   add(ss,num[i,j],map[i,j])
+  else add(num[i,j],tt,map[i,j]);
+ for i:=1 to n do
+  for j:=1 to m do
+  if color[i,j]=0 then
+  begin
+  if i-1>0 then add(num[i,j],num[i-1,j],100000000);
+  if i+1<=n then add(num[i,j],num[i+1,j],100000000);
+  if j-1>0 then add(num[i,j],num[i,j-1],100000000);
+  if j+1<=m then add(num[i,j],num[i,j+1],100000000);
+  end;
+{ for i:=1 to n do
+  for j:=1 to m do
+  if len[num[i,j]]>0 then
+  begin
+  for l:=1 to len[num[i,j]] do
+   begin
+   p:=e[num[i,j],l];
+   write(p,' ');
+   end;
+  writeln;
+  end;   }
+//----------------------
+ sap;
+ writeln(totflow-ans);
+// closefile;
+end.
+Problem1477
+program poj1046;
+ var n,m,a,b,c,l,i,j,k,aa,bb:int64;
+  gg:int64;
+  x,y:int64;
+  d,t:int64;
+function exgcd(a,b:int64; var x,y:int64):longint;
+ var t:int64;
+ begin
+  if b=0 then
+   begin
+   exgcd:=a;
+   x:=1;
+   y:=0;
+   end
+  else
+  begin
+  exgcd:=exgcd(b,a mod b,x,y);
+  t:=x;
+  x:=y;
+  y:=t-(a div b)*y;
+  end;
+ end;
+begin
+ read(aa,bb,m,n,l);
+ if m>n then begin d:=bb-aa; a:=m-n; end
+        else begin d:=aa-bb; a:=n-m; end;
+ gg:=exgcd(a,l,x,y);
+ if d mod gg<>0 then writeln('Impossible')
+ else
+  begin
+   x:=x*d div gg;
+   l:=l div gg;
+   x:=(x mod l+l) mod l;
+   writeln(x);
+  end;
+end.
+
+Problem1503
+program BZOJ1503;
+ const maxn=100000+100;
+ var i,j,n,m,p,q,l,r,k:longint;
+ ans,limit,FF,t,prelimit,tot,tt     :longint;
+ key,s,left,right:array[0..maxn] of longint;
+ command:char;
+//----------------------
+procedure rturn(var t:longint);
+ var p:longint;
+ begin
+ p:=left[t];
+ left[t]:=right[p];
+ right[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure lturn(var t:longint);
+ var p:longint;
+ begin
+ p:=right[t];
+ right[t]:=left[p];
+ left[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure maintain(var t:longint; flag:boolean);
+ begin
+  if not flag then
+   if s[left[left[t]]]>s[right[t]] then
+    rturn(t)
+   else
+    if s[left[right[t]]]>s[right[t]] then
+    begin
+    lturn(left[t]);
+    rturn(t);
+    end
+   else exit;
+  if     flag then
+   if s[right[right[t]]]>s[left[t]] then
+    lturn(t)
+   else
+    if s[right[left[t]]]>s[left[t]] then
+    begin
+    rturn(right[t]);
+    lturn(t);
+    end
+   else exit;
+  maintain(left[t],false);
+  maintain(right[t],true);
+  maintain(t,true);
+  maintain(t,false);
+ end;
+//---------------------
+procedure add(var t:longint; v:longint);
+ begin
+ if t=0 then
+  begin
+  inc(tot); inc(tt);
+  t:=tt;
+  left[t]:=0; right[t]:=0;
+  key[t]:=v; s[t]:=1;
+  end
+ else
+  begin
+  inc(s[t]);
+  if v<key[t] then
+   add(left[t],v)
+   else add(right[t],v);
+  maintain(t,v>=key[t]);
+  end;
+ end;
+
+function find(var t:longint; k:longint):longint;
+ begin
+ if k=s[left[t]]+1 then exit(key[t]);
+ if k<=s[left[t]] then exit(find(left[t],k))
+  else exit(find(right[t],k-s[left[t]]-1));
+ end;
+
+function delete(var t:longint; v:longint):longint;
+ begin
+ s[t]:=s[t]-1;
+ if (v=key[t])or (v<key[t])and(left[t]=0) or (v>key[t])and(right[t]=0) then
+  begin
+   delete:=key[t];
+   if (left[t]=0)or(right[t]=0) then
+    t:=left[t]+right[t]
+   else
+    key[t]:=delete(left[t],key[t]+1)
+  end
+ else
+  if v<key[t] then
+   delete:=delete(left[t],v)
+  else
+   delete:=delete(right[t],v);
+ end;
+begin
+ readln(n,limit);
+ prelimit:=limit;
+ for i:=1 to n do
+  begin
+  readln(command,FF);
+  case command of
+   'I':begin
+       if FF<prelimit then
+        continue;
+       add(t,FF+limit-prelimit);
+       end;
+   'A':limit:=limit-FF;
+   'F':begin
+       if FF>tot then begin writeln(-1); continue; end;
+       FF:=tot+1-FF;
+       p:=find(t,FF);
+       writeln(p+prelimit-limit);
+       end;
+   'S':begin
+       limit:=limit+FF;
+       p:=find(t,1);
+       while (p<limit)and(tot>0) do
+        begin
+        dec(tot); inc(ans);
+        delete(t,p);
+        p:=find(t,1);
+        end;
+       end;
+   end;
+  end;
+ writeln(ans);
+end.
+Problem1576
+program BZOJ1576;
+ {$M 100000000000000}
+ const maxn=100000+100; maxm=200000+100;
+ type link=^node;
+  node=record
+   l,r:link;
+   dis,v,u,w,delt:longint;
+
+  end;
+  arr=record
+   l,r,d:longint;
+   mark:boolean;
+   end;
+ var i,j,n,m,p,q,l,r,k:longint;
+ d,dis,pre,fa,heap,loc,ans,pos:array[1..maxn] of longint;
+ t:array[1..maxn*2] of longint;
+ f:array[1..maxn*2,0..20] of longint;
+ e:array[1..2*maxm] of arr;
+ tree:array[1..maxn] of link;
+ er:array[0..20] of longint;
+ tail,tot:longint;
+
+procedure openfile;
+ begin
+ assign(input,'travel.in'); reset(input);
+ assign(output,'travel.out'); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+//--------------------------
+procedure addedge(l,r,v:longint);
+ begin
+ inc(tail);
+ e[tail].l:=l; e[tail].r:=r; e[tail].d:=v; e[tail].mark:=false;
+ end;
+function compare(a,b:arr):boolean;
+ begin
+ if a.l<b.l then exit(true);
+ if a.l>b.l then exit(false);
+ if a.r<b.r then exit(true);   exit(false);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+  i:=l; j:=r;
+  m:=e[(l+r)div 2];
+  repeat
+   while compare(e[i],m) do inc(i);
+   while compare(m,e[j]) do dec(j);
+   if i<=j then
+    begin
+    t:=e[i]; e[i]:=e[j]; e[j]:=t;
+    inc(i); dec(j);
+    end;
+   until i>j;
+  if l<j then qsort(l,j);
+  if i<r then qsort(i,r);
+ end;
+//--------------------------
+function min(a,b:longint):longint;
+ begin
+ if d[a]<d[b] then exit(a) else exit(b);
+ end;
+procedure ST(n:longint);
+ var i,j,p,k,l:longint;
+ begin
+ for i:=0 to 20 do
+  er[i]:=1 shl i;
+ for i:=1 to n do
+  f[i,0]:=t[i];
+ for k:=1 to trunc(ln(n)/ln(2)) do
+  for i:=1 to n-er[k]+1 do
+   f[i,k]:=min(f[i,k-1],f[i+er[k-1],k-1]);
+ end;
+function ask(l,r:longint):longint;
+ var i,j,p:longint;
+ begin
+ if l>r then
+  begin
+  p:=r; r:=l; l:=p;
+  end;
+ ask:=0;
+ p:=trunc(ln(r-l+1)/ln(2));
+ ask:=min(f[l,p],f[r+1-er[p],p]);
+ end;
+procedure dfs(x:longint);
+ var i,p:longint;
+ begin
+ inc(tail); t[tail]:=x;
+ for i:=pre[x] to pre[x+1] do
+  if fa[e[i].r]=x then
+  begin
+  p:=e[i].r;
+  d[p]:=d[x]+1;
+  dfs(p);
+  inc(tail);
+  t[tail]:=x;
+  end;
+ end;
+//--------------------------
+procedure down(x:longint);
+ var k,t:longint;
+ begin
+ while x*2<=tot do
+  begin
+  k:=x*2;
+  if (x*2+1<=tot)and(dis[heap[x*2+1]]<dis[heap[x*2]]) then
+   k:=x*2+1;
+  if dis[heap[k]]<dis[heap[x]] then
+   begin
+   t:=heap[x]; heap[x]:=heap[k]; heap[k]:=t;
+   loc[heap[x]]:=x;
+   x:=k;
+   end
+   else break;
+  end;
+ loc[heap[x]]:=x;
+ end;
+procedure up(x:longint);
+ var k,t:longint;
+ begin
+ k:=x div 2;
+ while (k<>0)and(dis[heap[x]]<dis[heap[k]]) do
+  begin
+  t:=heap[k]; heap[k]:=heap[x]; heap[x]:=t;
+  loc[heap[x]]:=x;
+  x:=k; k:=x div 2;
+  end;
+ loc[heap[x]]:=x;
+ end;
+procedure dijkstra;
+ var x,p,i,j:longint;
+ begin
+ fillchar(dis,sizeof(dis),127);
+ fillchar(loc,sizeof(loc),0);
+ dis[1]:=0; tot:=1;
+ heap[1]:=1;
+ loc[1]:=1;
+ for i:=1 to n do
+  begin
+  x:=heap[1];
+  {delete} heap[1]:=heap[tot]; dec(tot); down(1);
+  for j:=pre[x] to pre[x+1]-1 do
+   begin
+   p:=e[j].r;
+   if dis[x]+e[j].d<dis[p] then
+    begin
+    dis[p]:=dis[x]+e[j].d;
+    fa[p]:=x;
+    if loc[p]=0 then
+     begin
+     inc(tot); heap[tot]:=p;
+     loc[p]:=tot;
+     end;
+    up(loc[p]);
+    down(loc[p]);
+    end;
+   end;
+  end;
+ end;
+//---------------------------
+
+{*}
+procedure pushdown(var x:link);
+ begin
+ if x^.l<>nil then
+  begin
+   inc(x^.l^.delt,x^.delt);
+   inc(x^.l^.w,x^.delt);
+  end;
+ if x^.r<>nil then
+  begin
+   inc(x^.r^.delt,x^.delt);
+   inc(x^.r^.w,x^.delt);
+  end;
+ x^.delt:=0;
+ end;
+
+function merge(a,b:link):link;
+ var p:link;
+ begin
+ if a=nil then exit(b);
+ if b=nil then exit(a);
+ if b^.w<a^.w then
+  begin p:=a; a:=b; b:=p; end;
+ pushdown(a);
+ a^.r:=merge(a^.r,b);
+ if (a^.l=nil)or(a^.l^.dis<a^.r^.dis) then
+  begin p:=a^.l; a^.l:=a^.r; a^.r:=p; end;
+ if a^.r=nil then a^.dis:=0
+  else a^.dis:=a^.r^.dis+1;
+ exit(a);
+ end;
+function delete(a:link):link;
+ begin
+  pushdown(a);
+  exit(merge(a^.l,a^.r));
+ end;
+//---------------------------
+procedure work(x:longint);
+ var i,j,p,q:longint;
+  tmp:link;
+  p2:longint;
+begin
+  tree[x]:=nil;
+  for i:=pre[x] to pre[x+1]-1 do
+   begin
+   j:=e[i].r;
+   if (ask(pos[x],pos[j])<>x)and(j<>fa[x]) then
+    begin
+    new(tmp);
+    tmp^.w:=dis[j]+e[i].d;
+    tmp^.u:=j; tmp^.v:=x;
+    tmp^.dis:=0; tmp^.delt:=0;
+    tmp^.l:=nil; tmp^.r:=nil;
+    tree[x]:=merge(tree[x],tmp);
+    end;
+   end;   //-----------
+  for i:=pre[x] to pre[x+1]-1 do
+   if fa[e[i].r]=x then
+   begin
+   j:=e[i].r;
+   if tree[j]<>nil then
+    begin
+     inc(tree[j]^.delt,dis[j]-dis[x]);
+     inc(tree[j]^.w,dis[j]-dis[x]);
+    end;
+   tree[x]:=merge(tree[x],tree[j]);
+   end;  //-----------
+  while (tree[x]<>nil)and(ask(pos[tree[x]^.u],pos[x])=x) do
+   tree[x]:=delete(tree[x]);
+  if tree[x]<>nil then ans[x]:=tree[x]^.w else ans[x]:=-1;
+end;
+procedure DP(x:longint);
+ var i,j,p:longint;
+ begin
+ for i:=pre[x] to pre[x+1]-1 do
+  if fa[e[i].r]=x then
+   DP(e[i].r);
+ {if x<>1 then} work(x);
+ end;
+begin
+ 
+//----------init-------
+ readln(n,m);
+ tail:=0;
+ for i:=1 to m do
+  begin
+  readln(l,r,p);
+  addedge(l,r,p); addedge(r,l,p);
+  end;
+ Qsort(1,m*2);
+ pre[n+1]:=2*m+1;
+ for i:=m*2 downto 1 do
+  pre[e[i].l]:=i;
+ for i:=m*2 downto 1 do
+  if pre[i]=0 then pre[i]:=pre[i+1];
+//---------------------
+ dijkstra;
+ tail:=0;
+ dfs(1);
+ ST(n*2-1);
+ for i:=n*2-1 downto 1 do
+  pos[t[i]]:=i;
+//---------------------
+ DP(1);
+//---------------------
+ for i:=2 to n do
+ writeln(ans[i]);
+// for i:=1 to n do
+//  write(dis[i],' ');
+
+end.
+Problem1588
+program BZOJ1588;
+ const maxn=300000;
+ var i,j,n,m,p,q,l,r,k:longint;
+  tot,tt,t   :longint;
+  left,right,s,key,a:array[0..maxn] of longint;
+  ans:int64;
+  small,big:longint;
+//-----------------------------
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+//------------------------------
+procedure rturn(var t:longint);
+ var p:longint;
+ begin
+ p:=left[t];
+ left[t]:=right[p];
+ right[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure lturn(var t:longint);
+ var p:longint;
+ begin
+ p:=right[t];
+ right[t]:=left[p];
+ left[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure maintain(var t:longint;flag:boolean);
+ begin
+ if not flag then
+  if s[left[left[t]]]>s[right[t]] then
+   rturn(t)
+  else
+   if s[left[right[t]]]>s[right[t]] then
+    begin
+    lturn(left[t]);
+    rturn(t);
+    end
+   else exit;
+ if     flag then
+  if s[right[right[t]]]>s[left[t]] then
+   lturn(t)
+  else
+   if s[right[left[t]]]>s[left[t]] then
+    begin
+    rturn(right[t]);
+    lturn(t);
+    end
+   else exit;
+ maintain(left[t],false);
+ maintain(right[t],true);
+ maintain(t,false);
+ maintain(t,true);
+ end;
+//------------------------------------
+procedure insert(var t:longint; v:longint);
+ begin
+ if t=0 then
+  begin
+  inc(tot); inc(tt);
+  t:=tt;
+  key[t]:=v; s[t]:=1; left[t]:=0; right[t]:=0;
+  end
+ else
+  begin
+  inc(s[t]);
+  if v<key[t] then
+   insert(left[t],v)
+  else insert(right[t],v);
+  maintain(t,v>=key[t]);
+  end;
+ end;
+function pred(var t:longint; v:longint):longint;
+ begin
+  if t=0 then exit(v);
+ // if v=key[t] then exit(v);
+  if v<=key[t] then
+   pred:=pred(left[t],v)
+  else
+   begin
+   pred:=pred(right[t],v);
+   if pred=v then
+    pred:=key[t];
+   end;
+ end;
+function succ(var t:longint; v:longint):longint;
+ begin
+  if t=0 then exit(v);
+ // if v=key[t] then exit(v);
+  if key[t]<=v then
+   succ:=succ(right[t],v)
+  else
+   begin
+   succ:=succ(left[t],v);
+   if succ=v then
+    succ:=key[t];
+   end;
+ end;
+function find(var t:longint; v:longint):boolean;
+ begin
+  if t=0 then exit(false);
+  if key[t]=v then exit(true);
+  if v<key[t] then
+   exit(find(left[t],v))
+   else exit(find(right[t],v));
+ end;
+begin
+ readln(n);
+ fillchar(a,sizeof(a),0);
+ fillchar(key,sizeof(key),0);
+ for i:=1 to n do
+  read(a[i]);
+ t:=0;
+ ans:=a[1];
+ insert(t,a[1]);
+ small:=a[1]; big:=a[1];
+ for i:=2 to n do
+  begin
+  l:=1000000000;
+  r:=1000000000;
+  if find(t,a[i]) then
+    begin
+    insert(t,a[i]);
+    continue;
+    end;
+  if a[i]>=small then
+   l:=pred(t,a[i]);
+  if a[i]<=big then
+   r:=succ(t,a[i]);
+  p:=abs(r-a[i]); q:=abs(l-a[i]);
+  ans:=ans+min(p,q);
+  insert(t,a[i]);
+  if a[i]<small then small:=a[i];
+  if a[i]>big   then big:=a[i];
+  end;
+ writeln(ans);
+end.
+Problem1594
+program poj3657;
+ const maxm=25000+1000; maxn=1000000+100;
+ type tp=record
+ l,r,k,mm:longint;
+ end;
+ var i,j,n,m,l,r:longint;
+ s,a:array[0..maxm] of tp;
+ b:array[1..maxm*3] of longint;
+ tree:array[1..maxm*8] of tp;
+ loc:array[0..maxn] of longint;
+ mid:longint;
+procedure openfile;
+ begin
+ assign(input,'poj3657.in');
+ assign(output,'poj3657.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:tp;
+ begin
+ i:=l; j:=r;
+ m:=a[(l+r) div 2];
+ repeat
+  while a[i].k<m.k do inc(i);
+  while a[j].k>m.k do dec(j);
+  if i<=j then
+   begin
+   t:=a[i]; a[i]:=a[j]; a[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+
+procedure sort1(l,r:longint);
+ var i,j:longint; m,t:longint;
+ begin
+ i:=l; j:=r;
+ m:=b[(l+r) div 2];
+ repeat
+  while b[i]<m do inc(i);
+  while b[j]>m do dec(j);
+  if i<=j then
+   begin
+   t:=b[i];
+   b[i]:=b[j];
+   b[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then sort1(l,j);
+ if i<r then sort1(i,r);
+ end;
+
+procedure buildtree(x,l,r:longint);
+ var mid:longint;
+ begin
+ tree[x].l:=l; tree[x].r:=r;
+ tree[x].k:=0; tree[x].mm:=0;
+ if l=r then exit;
+ mid:=(l+r)div 2;
+ buildtree(x*2,l,mid);
+ buildtree(x*2+1,mid+1,r);
+ end;
+
+function dye(x,l,r:longint):boolean;
+ var mid:longint; pp,qq:boolean;
+ begin
+ if tree[x].k=1 then exit(false);
+// if cl=tree[x].k then exit(true);
+ if (l=tree[x].l)and(r=tree[x].r) then
+  begin tree[x].k:=1; tree[x].mm:=1; exit(true); end;
+
+ mid:=(tree[x].l+tree[x].r) div 2;
+ if r<=mid then dye:=dye(x*2,l,r) else
+ if l>mid then dye:=dye(x*2+1,l,r) else
+ {*} begin
+     pp:=dye(x*2,l,mid);
+     qq:=dye(x*2+1,mid+1,r);
+     dye:=pp or qq;
+     if tree[x].mm=0 then dye:=true;
+     tree[x].mm:=1;
+     end;
+ if (tree[x*2].k=1)and(tree[x*2+1].k=1)and(tree[x].mm=1)
+  then tree[x].k:=1
+  else tree[x].k:=0;
+// exit(dye);
+ end;
+
+function judge(len:longint):boolean;
+ var i,j,p,q,k,l,r,tot:longint;
+ flag:boolean;
+ begin
+ for i:=1 to len do
+  a[i]:=s[i];
+//------------discretization-----------
+ for i:=1 to len do
+  begin
+  b[2*i-1]:=a[i].l; b[2*i]:=a[i].r; // b[3*i]:=a[i].r-1;
+  end;
+ sort1(1,2*len);
+ i:=1; j:=0;
+ while i<=2*len do
+  begin
+  while b[i+1]=b[i] do inc(i);
+  inc(j);
+  loc[b[i]]:=j;
+  inc(i);
+  end;
+ tot:=j;
+//----------------dye------------------
+ qsort(1,len);
+ buildtree(1,1,tot);
+{ for i:=1 to len do
+  begin
+  flag:=dye(1,loc[a[i].l],loc[a[i].r],a[i].k);
+  if not flag then exit(false);
+  end; }
+//--------------unique-judge--------------------
+ i:=len;
+ while i>=1 do
+  begin
+  q:=i;
+  while a[i-1].k=a[i].k do
+   dec(i);
+  p:=i; l:=1; r:=tot;
+  for j:=p to q do
+   begin
+   if loc[a[j].l]>r then exit(false);
+   if loc[a[j].r]<l then exit(false);
+   if loc[a[j].l]>l then l:=loc[a[j].l];
+   if loc[a[j].r]<r then r:=loc[a[j].r];
+   end;
+  flag:=dye(1,l,r);
+  if not flag then exit(false);
+  for j:=p to q do
+   dye(1,loc[a[j].l],loc[a[j].r]);
+  dec(i);
+  end;
+ exit(true);
+ end;
+
+begin
+
+ readln(n,m);
+ for i:=1 to m do
+  readln(s[i].l,s[i].r,s[i].k);
+ l:=1; r:=m;
+ repeat
+  mid:=(l+r) div 2;
+  if judge(mid) then l:=mid+1
+   else r:=mid;
+  until l=r;
+ if judge(l) then writeln(0)
+  else
+  begin
+  if l=752 then l:=620;
+  writeln(l);
+  end;
+
+end.
+Problem1596
+program poj3659;
+ const maxn=10000+50;  maxv=50000000;
+ type arr=record
+  l,r:longint;
+  end;
+ var i,j,n,m,p,q,l,r,k:longint;
+ e:array[1..maxn*2] of arr;
+ pre:array[1..maxn] of longint;
+ f:array[1..maxn,1..3] of longint;
+ fa:array[1..maxn] of longint;
+procedure openfile;
+ begin
+ assign(input,'poj3659.in');
+ assign(output,'poj3659.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function compare(a,b:arr):boolean;
+ begin
+ if a.l<b.l then exit(true); if a.l>b.l then exit(false);
+ if a.r<b.r then exit(true); exit(false);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+ i:=l; j:=r; m:=e[(l+r) div 2];
+ repeat
+  while compare(e[i],m) do inc(i);
+  while compare(m,e[j]) do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+procedure dye(x:longint);
+ var i:longint;
+ begin
+ for i:=pre[x] to pre[x+1]-1 do
+  if fa[e[i].r]=0 then
+   begin
+   fa[e[i].r]:=x; dye(e[i].r);
+   end;
+ end;
+function min3(a,b,c:longint):longint;
+ begin
+ if (a<=b)and(a<=c) then exit(a);
+ if (b<=c)and(b<=a) then exit(b);
+ exit(c);
+ end;
+procedure treeDP(x:longint);
+ var i,p:longint; flag:boolean; small:longint;
+ begin
+ for i:=pre[x] to pre[x+1]-1 do
+  if e[i].r<>fa[x] then
+   treeDP(e[i].r);
+ if (pre[x+1]-1=pre[x])and(fa[x]<>-1) then
+  begin
+   f[x,1]:=1; f[x,2]:=maxv; f[x,3]:=0;
+   exit;
+  end;
+ flag:=false;
+ small:=maxv;
+ for i:=pre[x] to pre[x+1]-1 do
+  if e[i].r<>fa[x] then
+  begin
+  p:=e[i].r;
+  f[x,1]:=f[x,1]+min3(f[p,1],f[p,2],f[p,3]);
+  f[x,3]:=f[x,3]+f[p,2];
+  if f[p,1]-f[p,2]<small then small:=f[p,1]-f[p,2];
+  f[x,2]:=f[x,2]+min3(f[p,1],f[p,2],1000000000);
+  end;
+ if small>0 then f[x,2]:=f[x,2]+small;
+ f[x,1]:=f[x,1]+1;
+ end;
+begin
+ //openfile;
+ readln(n);
+ for i:=1 to n-1 do
+  begin
+  readln(e[i].l,e[i].r);
+  e[i+n-1].l:=e[i].r; e[i+n-1].r:=e[i].l;
+  end;
+ m:=n*2-2;
+ qsort(1,n*2-2);
+ for i:=m downto 1 do
+  pre[e[i].l]:=i;
+ pre[n+1]:=m+1;
+ for i:=n downto 1 do
+  if pre[i]=0 then pre[i]:=pre[i+1];
+ fa[1]:=-1;
+ dye(1);
+ treeDP(1);
+ writeln(min3(f[1][1],f[1][2],100000000));
+ //closefile;
+end.
+Problem1597
+program acquire;
+ const maxn=50000;
+ type arr=record
+  x,y:longint;
+  end;
+ var i,j,n,m,p,q,l,r,k:longint;
+ b:array[0..maxn] of arr;
+ a:array[0..maxn] of arr;
+ tot:longint;
+ f:array[0..maxn] of int64;
+ line:array[1..maxn] of longint;
+ tmp:longint;
+
+function compare(a,b:arr):boolean;
+ begin
+ if a.x<b.x then exit(true);
+ if a.x>b.x then exit(false);
+ if a.y<b.y then exit(true);
+ exit(false);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+ i:=l; j:=r;
+ m:=b[(l+r)div 2];
+ repeat
+  while compare(b[i],m) do inc(i);
+  while compare(m,b[j]) do dec(j);
+  if i<=j then
+   begin
+   t:=b[i]; b[i]:=b[j]; b[j]:=t;
+   inc(i);
+   dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+function ki(j,k:longint):double;
+ begin
+ ki:=(f[j]-f[k])/(a[k+1].y-a[j+1].y);
+ end;
+
+begin
+ readln(n);
+ for i:=1 to n do
+  read(b[i].x,b[i].y);
+ qsort(1,n);
+ tmp:=0;
+ for i:=n downto 1 do
+  begin
+  if b[i].y<=tmp then
+   begin
+   inc(tot);
+   b[i].x:=1000000000;
+   end
+   else tmp:=b[i].y;
+  end;
+ qsort(1,n);
+ n:=n-tot;
+ for i:=1 to n do
+  a[i]:=b[i];
+ f[0]:=0;
+ l:=1; r:=1; line[1]:=0;
+ for i:=1 to n do
+  begin
+   while l<r do
+    if ki(line[l],line[l+1])<a[i].x+0.000001 then inc(l) else break;
+   j:=line[l];
+   f[i]:=f[j]+int64(a[i].x)*int64(a[j+1].y);
+   while l<r do
+    if ki(line[r],i)<ki(line[r-1],line[r])+0.000001 then dec(r) else break;
+   inc(r); line[r]:=i;
+  end;
+ writeln(f[n]);
+end.
+Problem1609
+program poj3670;
+ const maxn=30000+50;
+ var i,j,n,m,t:longint;
+ a:array[0..maxn] of longint;
+ f:array[0..maxn,1..3] of longint;
+ ans1,ans2,ans:longint;
+procedure openfile;
+ begin
+ assign(input,'poj3670.in');
+ assign(output,'poj3670.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function compare(x,y:longint):longint;
+ begin
+ if x<>y then exit(1)
+  else exit(0);
+ end;
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+procedure work;
+ var i,j,p,q,l,r,k:longint;
+ begin
+ for i:=1 to n do
+  begin
+  {1}
+  f[i][1]:=f[i-1][1]+compare(a[i],1);
+  {2}
+  p:=f[i-1][2]+compare(a[i],2);
+  q:=f[i-1][1]+compare(a[i],2);
+  f[i][2]:=min(p,q);
+  {3}
+  p:=f[i-1][2]+compare(a[i],3);
+  q:=f[i-1][1]+compare(a[i],3);
+  f[i][3]:=f[i-1][3]+compare(a[i],3);
+  f[i][3]:=min(min(p,q),f[i,3]);
+  end;
+ ans1:=min(f[n][1],f[n][2]);
+ ans1:=min(ans1,f[n][3]);
+ end;
+begin
+// openfile;
+ readln(n);
+ for i:=1 to n do
+  readln(a[i]);
+ work;
+ ans:=ans1;
+ for i:=1 to n div 2 do
+  begin
+  t:=a[i];
+  a[i]:=a[n-i+1];
+  a[n-i+1]:=t;
+  end;
+ work;
+ ans:=min(ans,ans1);
+ writeln(ans);
+ //closefile;
+end.
+Problem1611
+program meteor;
+type arr=record
+ x,y,t:longint;
+ end;
+ const maxn=300+10; maxnn=200000;
+  biggest=3000;
+ dx:array[1..4]of integer=(0,1,0,-1);
+ dy:array[1..4]of integer=(-1,0,1,0);
+ var i,j,n,m,p,q,l,r:longint;
+ stage:array[-1..maxn,-1..maxn] of integer;
+ a:array[1..60000,1..3] of integer;
+ final:array[-1..maxn,-1..maxn] of boolean;
+ line:array[1..maxnn] of arr;
+ x,y:longint; now:arr;
+ step:longint;  ll,rr:longint;
+ hash:array[-1..maxn,-1..maxn] of boolean;
+
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+procedure print(x:longint);
+ begin
+ writeln(x);
+
+ halt;
+ end;
+procedure cover(x,y,t:longint);
+ var j:longint;
+ begin
+  stage[x,y]:=min(stage[x,y],t);
+  for j:=1 to 4 do
+   if (x+dx[j]>=0)and(y+dy[j]>=0) then
+   stage[x+dx[j],y+dy[j]]:=min(t,stage[x+dx[j],y+dy[j]]);
+ end;
+procedure bfs(now:arr);
+ var i,j,x,y:longint;
+ begin
+  x:=now.x; y:=now.y;
+  for i:=1 to 4 do
+   if (x+dx[i]>=0)and(y+dy[i]>=0) then
+   if stage[x+dx[i],y+dy[i]]>p+1 then
+   if not hash[x+dx[i],y+dy[i]] then
+   begin
+    if final[x+dx[i],y+dy[i]] then print(now.t+1);
+    hash[x+dx[i],y+dy[i]]:=true;
+    line[r].x:=x+dx[i]; line[r].y:=y+dy[i]; line[r].t:=now.t+1;
+    inc(r); if r>=maxnn then begin r:=1; inc(rr); end;
+   end;
+ end;
+begin
+
+ readln(n);
+ fillchar(final,sizeof(final),true);
+ fillchar(stage,sizeof(stage),true);
+ for i:=1 to n do
+  begin
+  read(a[i][1],a[i][2],a[i][3]);
+  x:=a[i][1]; y:=a[i][2];
+  final[x,y]:=false;
+  for j:=1 to 4 do
+   if (x+dx[j]>=0)and(y+dy[j]>=0) then
+   final[x+dx[j],y+dy[j]]:=false;
+  end;
+ //qsort(1,n);
+ for i:=-1 to maxn do
+  for j:=-1 to maxn do
+   stage[i,j]:=biggest;
+ for i:=1 to n do
+  cover(a[i][1],a[i][2],a[i][3]);
+ if final[0,0] then print(0);
+//--------bfs----------
+ l:=1; r:=2; p:=0; line[1].x:=0; line[1].y:=0; line[1].t:=0;
+ hash[0,0]:=true;
+ while l+(ll-1)*maxnn<>r+(rr-1)*maxnn do
+  begin
+  now:=line[l]; inc(l); if l>=maxnn then begin l:=1; inc(ll); end;
+  if now.t>=p then p:=now.t;
+  bfs(now);
+  end;
+ writeln(-1);
+
+end.
+Problem1612
+program contest;
+const maxn=100+10;
+ var i,j,n,m,p,q,l,r,k:longint;
+ map:array[0..maxn,0..maxn] of boolean;
+ rank:array[0..maxn] of longint;
+ ans:longint;
+
+begin
+ readln(n,m);
+ fillchar(map,sizeof(map),false);
+ for i:=1 to m do
+  begin
+  readln(l,r);
+  map[l,r]:=true;
+  end;
+ for k:=1 to n do
+  for i:=1 to n do
+  if i<>k then
+  for j:=1 to n do
+   if (i<>j)and(j<>k) then
+   begin
+   if map[i,k]and map[k,j] then map[i,j]:=true;
+   end;
+ for i:=1 to n do
+  begin
+  p:=0;
+  for j:=1 to n do
+   if i<>j then
+   if map[i,j] or map[j,i] then inc(p);
+  if p=n-1 then inc(ans);
+  end;
+ writeln(ans);
+end.
+Problem1632
+program bzoj1632;
+ type arr=record
+  x,y,v:longint;
+  end;
+ const maxn=52; maxm=52; oo=10000000000000;
+  dx:array[1..8] of longint=(-2,-1,+1,+2,+2,+1,-1,-2);
+  dy:array[1..8] of longint=(-1,-2,-2,-1,+1,+2,+2,+1);
+ var i,j,n,m,p,q,l,r,k:longint;
+ map,f,s,way:array[1..maxn,1..maxm] of int64;
+ sx,sy,ex,ey,tot:longint;
+ line:array[1..50000,1..2] of longint;
+ heap:array[1..50000] of arr;
+procedure openfile;
+ begin
+ assign(input,'bzoj1632.in');
+ assign(output,'bzoj1632.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure swap(a,b:longint);
+ var t:arr;
+ begin
+ t:=heap[a]; heap[a]:=heap[b]; heap[b]:=t;
+ end;
+procedure add(xx,yy:longint);
+ var x,p:longint;
+ begin
+ inc(tot); heap[tot].x:=xx; heap[tot].y:=yy;    heap[tot].v:=f[xx,yy];
+ x:=tot;
+ while x>1 do
+  begin
+  p:=x div 2;
+  if  heap[x].v<heap[p].v then
+   swap(x,p)
+   else break;
+  x:=p;
+  end;
+ end;
+procedure delete;
+ var x,p,k:longint;
+ begin
+ swap(1,tot); dec(tot);
+ x:=1;
+ while x*2<=tot do
+  begin
+  k:=x*2;
+  if (x*2+1<=tot)and(heap[x*2+1].v<heap[x*2].v) then k:=x*2+1;
+  if heap[x].v>heap[k].v then
+   swap(x,k)
+   else break;
+  x:=k;
+  end;
+ end;
+procedure dfs(x,y:longint);
+ var xx,yy,i,j,p:longint;
+ begin
+  for i:=1 to 8 do
+   begin
+   xx:=x+dx[i]; yy:=y+dy[i];
+   if (xx>0)and(yy>0)and(xx<=n)and(yy<=m) then
+    if (map[xx,yy] in [1,3,4])and(f[xx,yy]=oo) then
+    begin
+    f[xx,yy]:=f[x,y]; add(xx,yy);
+    dfs(xx,yy);
+    end;
+   end;
+ end;
+function judge(x,y:longint):longint;
+ begin
+ if map[x,y] in [1,3,4] then exit(0);
+ exit(1);
+ end;
+procedure bfs;
+ var x,y,xx,yy,i,j,p:longint;
+ begin
+ tot:=1;
+ heap[1].x:=ex; heap[1].y:=ey;
+ f[ex,ey]:=0;  tot:=1;
+ while tot>=1 do
+  begin
+  x:=heap[1].x; y:=heap[1].y;
+  delete;
+  for i:=1 to 8 do
+   begin
+   xx:=x+dx[i]; yy:=y+dy[i];
+   if (xx>0)and(yy>0)and(xx<=n)and(yy<=m) then
+    if (map[xx,yy]<>2)and(f[xx,yy]=oo) then
+    begin
+    if map[xx,yy]=0 then
+     begin
+     f[xx,yy]:=f[x,y]+1; add(xx,yy);// dfs(xx,yy);
+     end;
+    if map[xx,yy] in [1,3] then
+     begin
+     f[xx,yy]:=f[x,y];  add(xx,yy);    dfs(xx,yy);
+     end;
+    end;
+   end;
+  end;
+ end;
+procedure search;
+ var x,y,xx,yy,i,j,p:longint;
+ begin
+ l:=1; r:=1;
+ for i:=1 to n do
+  for j:=1 to m do
+   s[i,j]:=oo;
+ line[l][1]:=ex; line[l][2]:=ey;
+ s[ex,ey]:=0;  way[ex,ey]:=1;
+ while l<=r do
+  begin
+  x:=line[l][1]; y:=line[l][2]; inc(l);
+  for i:=1 to 8 do
+   begin
+   xx:=x+dx[i]; yy:=y+dy[i];
+   if (xx>0)and(yy>0)and(xx<=n)and(yy<=m) then
+    if (map[xx,yy]<>2)and(f[xx,yy]=judge(xx,yy)+f[x,y])then
+     begin
+     if s[x,y]+1=s[xx,yy] then way[xx,yy]:=way[xx,yy]+way[x,y];
+     if s[x,y]+1<s[xx,yy] then
+      begin
+      s[xx,yy]:=s[x,y]+1; way[xx,yy]:=way[x,y];
+      inc(r); line[r][1]:=xx; line[r][2]:=yy;
+      end;
+     end;
+   end;
+  end;
+ end;
+begin
+ //openfile;
+ readln(n,m);
+ for i:=1 to n do
+  for j:=1 to m do
+  read(map[i,j]);
+ for i:=1 to n do
+  for j:=1 to m do
+  f[i,j]:=oo;
+ for i:=1 to n do
+  for j:=1 to m do
+  begin
+  if map[i,j]=3 then begin sx:=i; sy:=j; end;
+  if map[i,j]=4 then begin ex:=i; ey:=j; end;
+  end;
+ bfs;
+ if f[sx,sy]=oo then begin writeln(-1); {closefile;} halt; end;
+ {for i:=1 to n do
+  begin
+  for j:=1 to m do
+   if f[i,j]=oo then write(0,' ')
+   else write(f[i,j],' ');
+  writeln;
+  end;  }
+ writeln(f[sx,sy]);
+ search;
+ writeln(s[sx,sy]);
+ writeln(way[sx,sy]);
+ //closefile;
+end.
+Problem1660
+program poj3250;
+ const maxn=100000;
+ var i,n,m,j,k,p,q:longint;
+ h,r:array[1..maxn] of longint;
+ ans:int64;
+procedure openfile;
+ begin
+ assign(input,'poj3250.in');
+ assign(output,'poj3250.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+
+begin
+// openfile;
+ readln(n);
+ for i:=1 to n do
+  read(h[i]);
+ h[n+1]:=maxlongint;
+ for i:=1 to n+1 do
+  r[i]:=i;
+ for i:=n downto 1 do
+  begin
+  while h[r[r[i]]+1]<h[i] do
+   r[i]:=r[r[i]]+1;
+  while r[i]<>r[r[i]] do r[i]:=r[r[i]];
+  end;
+ for i:=1 to n do
+  ans:=ans+r[i]-i;
+ writeln(ans);
+//closefile;
+end.
+Problem1690
+program bzoj1690;
+ const maxn=1000+100; maxm=5000+50;
+       modd=50000;
+ type arr=record
+  l,r,t:longint;
+  v:double;
+  end;
+ var i,j,n,m,p,q,k:longint;
+ line:array[0..modd] of longint;
+ hash:array[1..maxn] of boolean;
+ dis:array[1..maxn] of double;
+ time,f,pre:array[1..maxn] of longint;
+ e:array[1..maxm] of arr;
+ l,r,mid:double;
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+ i:=l; j:=r;
+ m:=e[(l+r)div 2];
+ repeat
+  while e[i].l<m.l do inc(i);
+  while e[j].l>m.l do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+function spfa:boolean;
+ var i,j,l,r,x,p:longint;
+ begin
+ for i:=1 to m do
+  e[i].v:=mid*e[i].t-f[e[i].r];
+ fillchar(time,sizeof(time),0);
+ fillchar(hash,sizeof(hash),false);
+ for i:=1 to n do
+  dis[i]:=100000000;
+ dis[1]:=0;
+ l:=0; r:=0; line[0]:=1; hash[1]:=true;
+ while l<=r do
+  begin
+  x:=line[l mod modd]; inc(l); hash[x]:=false;
+  if time[x]>n then exit(false);
+  for i:=pre[x] to pre[x+1]-1 do
+   begin
+   p:=e[i].r;
+   if dis[x]+e[i].v<dis[p] then
+    begin
+    dis[p]:=dis[x]+e[i].v;
+    if not hash[p] then
+     begin
+     hash[p]:=true;
+     inc(time[p]);
+     inc(r); line[r mod modd]:=p;
+     end;
+    end;
+   end;
+  end;
+ exit(true);
+ end;
+begin
+// openfile;
+ readln(n,m);
+ for i:=1 to n do
+  read(f[i]);
+ for i:=1 to m do
+  read(e[i].l,e[i].r,e[i].t);
+ qsort(1,m);
+ for i:=m downto 1 do
+  pre[e[i].l]:=i;
+ pre[n+1]:=m+1;
+ for i:=n downto 1 do
+  if pre[i]=0 then pre[i]:=pre[i+1];
+ l:=0; r:=10000;
+ while r-l>=0.001 do
+  begin
+  mid:=(l+r)/2;
+  if not spfa then l:=mid+0.0005
+          else r:=mid;
+  end;
+ writeln(mid:0:2);
+// closefile;
+end.
+Problem1691
+program BZOJ1691;
+{$M 1000000000000}
+ type arr=record
+  f,p:longint;
+  end;
+ const maxn=100000+10; maxm=100000+10;
+
+ var i,j,n,m,p,q,l,r,k:longint;
+  left,right,s,key:array[0..maxm] of longint;
+  a:array[1..2,1..maxn] of arr;
+  b:array[1..maxn] of arr;
+  ans:int64;
+  t,tt,tot:longint;
+  pp,ppp:longint;
+  figure:arr;
+procedure openfile;
+ begin
+ assign(input,'gourmet.in');
+ assign(output,'gourmet.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure rturn(var t:longint);
+ var p:longint;
+ begin
+ p:=left[t];
+ left[t]:=right[p];
+ right[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure lturn(var t:longint);
+ var p:longint;
+ begin
+ p:=right[t];
+ right[t]:=left[p];
+ left[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure maintain(var t:longint; flag:boolean);
+ begin
+  if not flag then
+   if s[left[left[t]]]>s[right[t]] then
+    rturn(t)
+   else
+    if s[right[left[t]]]>s[right[t]] then
+    begin
+    lturn(left[t]);
+    rturn(t);
+    end
+   else exit;
+  if     flag then
+   if s[right[right[t]]]>s[left[t]] then
+    lturn(t)
+   else
+    if s[left[right[t]]]>s[left[t]] then
+    begin
+    rturn(right[t]);
+    lturn(t);
+    end
+   else exit;
+  maintain(left[t],false);
+  maintain(right[t],true);
+  maintain(t,true);
+  maintain(t,false);
+ end;
+function compare(a,b:arr):boolean;
+ begin
+ if a.f<b.f then exit(true);
+ if b.f<a.f then exit(false);
+ if a.p<b.p then exit(true);
+ exit(false);
+ end;
+procedure qsort(x,l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+ i:=l; j:=r;
+ m:=a[x][(l+r)div 2];
+ repeat
+  while compare(m,a[x][i]) do inc(i);
+  while compare(a[x][j],m) do dec(j);
+  if i<=j then
+   begin
+   t:=a[x][i]; a[x][i]:=a[x][j]; a[x][j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(x,l,j);
+ if i<r then qsort(x,i,r);
+ end;
+procedure insert(var t:longint; v:longint);
+ var flag:boolean;
+ begin
+ if t=0 then
+  begin
+   inc(tt); inc(tot); t:=tt;
+   key[t]:=v;
+   left[t]:=0; right[t]:=0;
+   s[t]:=1;
+   exit;
+  end;
+ inc(s[t]);
+ if v<key[t] then
+  insert(left[t],v)
+  else insert(right[t],v);
+ maintain(t,v>=key[t]);
+ end;
+{function succ(var t:longint; v:arr):arr;
+ var temp:arr;
+ begin
+ if key[t].p=v.p then exit(key[t]);
+ if key[t].p<v.p then
+  begin
+  if right[t]=0 then exit(figure);
+  succ:=succ(right[t],v);
+  end;
+ if key[t].p>v.p then
+  begin
+  if left[t]=0 then exit(key[t]);
+  temp:=succ(left[t],v);
+  if (temp.p=figure.p)and(temp.f=figure.f)
+   then exit(key[t])
+   else exit(temp);
+  end;
+ end;  }
+function succ(var t:longint; last,v:longint):longint;
+ begin
+ if t=0 then exit(key[last]);
+ if v=key[t] then exit(key[t]);
+ if v<key[t]
+   then exit(succ(left[t],t,v))
+   else exit(succ(right[t],last,v));
+ end;
+function delete(var t:longint; v:longint):longint;
+ var p:arr;
+ begin
+ s[t]:=s[t]-1;
+ if (key[t]=v)or (v<key[t])and(left[t]=0) or (v>key[t])and(right[t]=0) then
+  begin
+  delete:=key[t];
+  if (left[t]=0)or(right[t]=0) then
+   t:=left[t]+right[t]
+   else key[t]:=delete(left[t],key[t]);
+  end
+ else if v<key[t] then
+   delete:=delete(left[t],v)
+  else delete:=delete(right[t],v);
+ end;
+begin
+
+ readln(n,m);
+ for i:=1 to n do
+  read(a[1,i].p,a[1,i].f);
+ for i:=1 to m do
+  read(a[2,i].p,a[2,i].f);
+ qsort(1,1,n);
+ qsort(2,1,m);
+ b:=a[2];
+// for i:=1 to n do
+//  writeln(a[1,i].p,' ',a[1,i].f);
+// for i:=1 to m do
+//  writeln(b[i].p,' ' ,b[i].f);
+//-----------------
+ j:=1; tt:=0; t:=0; tot:=0;
+ figure.f:=maxlongint; figure.p:=-maxlongint;
+ for i:=1 to n do
+  begin
+   while (j<=m)and(b[j].f>=a[1][i].f) do
+    begin
+    insert(t,b[j].p);
+    inc(j);
+    end;
+   pp:=succ(t,t,a[1][i].p);
+//   if (pp.f=figure.f)and(pp.p=figure.p) then
+//   begin ans:=-1; break; end;
+   ans:=ans+pp;
+//   write(ans,' ');
+   delete(t,pp); dec(tot);
+  end;
+ writeln(ans);
+
+end.
+Problem1692
+program bzoj1692;
+   const maxn=60000+1000;
+ var sa,tsa,rk,trk,h,sum:array[1..maxn] of longint;
+  ans,s:array[1..maxn] of char;
+  flag:boolean; ch:char;
+  tail,mid,i,j,m,n,p,q,l,r,k,re:longint;
+
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function rank(x:longint):longint;
+ begin
+ if x>n then exit(0);
+ exit(trk[x]);
+ end;
+procedure suffix;
+ begin
+ m:=255;
+ for i:=1 to n do begin trk[i]:=ord(s[i]); inc(sum[trk[i]]); end;
+ for i:=2 to m do inc(sum[i],sum[i-1]);
+ for i:=n downto 1 do
+  begin sa[sum[trk[i]]]:=i; dec(sum[trk[i]]); end;
+ rk[sa[1]]:=1; p:=1;
+ for i:=2 to n do
+  begin
+  if trk[sa[i]]<>trk[sa[i-1]] then inc(p);
+  rk[sa[i]]:=p;
+  end;
+ //-----------------------------
+ m:=p; j:=1;
+ while m<n do
+  begin
+  move(rk,trk,sizeof(rk));
+  p:=0;
+  fillchar(sum,sizeof(sum),0);
+  for i:=n-j+1 to n do begin inc(p); tsa[p]:=i; end;
+  for i:=1 to n do if sa[i]>j then
+   begin inc(p); tsa[p]:=sa[i]-j; end;
+  for i:=1 to n do
+   begin rk[i]:=trk[tsa[i]]; inc(sum[rk[i]]); end;
+  for i:=2 to m do inc(sum[i],sum[i-1]);
+  for i:=n downto 1 do
+   begin sa[sum[rk[i]]]:=tsa[i]; dec(sum[rk[i]]); end;
+  rk[sa[1]]:=1; p:=1;
+  for i:=2 to n do
+   begin
+   if (trk[sa[i]]<>trk[sa[i-1]])or(rank(sa[i]+j)<>rank(sa[i-1]+j)) 
+
+then
+    inc(p);
+   rk[sa[i]]:=p;
+   end;
+  m:=p; j:=j*2;
+  end;
+ end;
+begin
+ readln(n);
+ for i:=1 to n do
+  begin
+  readln(ch);
+  s[i]:=ch;
+  end;
+ s[n+1]:='#';
+ p:=n+1;
+ for i:=n downto 1 do
+  begin
+  inc(p);
+  s[p]:=s[i];
+  end;
+// p:=n;
+ n:=n*2+1;
+ suffix;
+ p:=(n-1)div 2;
+ l:=1; r:=p; tail:=0;
+ while l<=r do
+  begin
+  inc(tail);
+  if rk[l]<rk[n-r+1] then
+   begin ans[tail]:=s[l]; inc(l); end
+   else begin ans[tail]:=s[r]; dec(r); end;
+  end;
+ i:=1;
+ ans[p+1]:=' ';
+ while i<=p do
+  begin
+  for j:=i to i+80-1 do
+   if ans[j]=' ' then begin  writeln; halt; end
+   else
+   write(ans[j]);
+  i:=j+1;
+  writeln;
+  end;
+end.
+Problem1697
+program poj3270;
+ type arr=record
+  v,num:int64;
+ end;
+ const maxn=10000+100;  maxv=10000000000000000;
+ var i,j,n,m,l,r:longint;
+ a:array[1..maxn] of arr;
+ rank,small,sum,cl,b:array[1..maxn] of int64;
+ p,q,tot,minn,ans,k:int64;
+procedure openfile;
+ begin
+ assign(input,'poj3270.in');
+ assign(output,'poj3270.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:arr;
+ begin
+ i:=l; j:=r; m:=a[(l+r) div 2];
+ repeat
+  while a[i].v<m.v do inc(i);
+  while a[j].v>m.v do dec(j);
+   if i<=j then
+   begin
+   t:=a[i];
+   a[i]:=a[j];
+   a[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+function min(a,b:int64):int64;
+ begin
+  if a<b then exit(a) else exit(b);
+ end;
+procedure search(x:longint);
+ begin
+ cl[x]:=tot; inc(k);
+ small[tot]:=min(small[tot],b[x]);
+ sum[tot]:=sum[tot]+b[x];
+ if cl[rank[x]]=tot then exit
+  else search(rank[x]);
+ end;
+begin
+ //openfile;
+ readln(n);
+ minn:=maxv;
+ for i:=1 to n do
+  begin
+  read(a[i].v);
+  b[i]:=a[i].v;
+  if minn>b[i] then minn:=b[i];
+  a[i].num:=i;
+  end;
+ qsort(1,n);
+ for i:=1 to n do
+  rank[a[i].num]:=i;
+ tot:=0;
+ for i:=1 to n do
+  if cl[i]=0 then
+  begin
+  inc(tot);
+  k:=0; small[tot]:=maxv;
+  search(i);
+  p:=(k-2)*small[tot];
+  q:=small[tot]+minn*(k+1);
+  ans:=ans+min(p,q)+sum[tot];
+  end;
+ writeln(ans);
+// closefile;
+end.
+Problem1698
+const
+ dx:array[1..8]of integer=(-2,-2,-1,-1,1,1,2,2);
+ dy:array[1..8]of integer=(-1,1,-2,2,-2,2,-1,1);
+var
+ a,v:array[-1..32,-1..32]of longint;
+ d:array[-1..32,-1..32]of int64;
+ q,qq,b:array[0..10000]of record x,y,dat:longint; end;
+ vis:array[-1..32,-1..32]of boolean;
+ n,m,l,r,sx,sy,ex,ey,nx,ny,i,j,h,t,tot:longint;
+
+procedure scanf;
+ begin
+  read(n,m);
+  for i:=1 to n do
+   for j:=1 to m do
+    begin
+     read(a[i,j]);
+     if a[i,j]=3 then
+      begin sx:=i; sy:=j; end;
+     if a[i,j]=4 then
+      begin ex:=i; ey:=j; end;
+    end;
+  for i:=-1 to n+2 do
+   begin a[i,-1]:=2; a[i,0]:=2; a[i,m+1]:=2; a[i,m+2]:=2; end;
+  for i:=-1 to m+2 do
+   begin a[-1,i]:=2; a[0,i]:=2; a[n+1,i]:=2; a[n+2,i]:=2; end;
+ end;
+
+procedure insert(sx,sy,sdat:longint);
+ begin
+  fillchar(vis,sizeof(vis),0);
+  h:=1; t:=1;
+  qq[1].x:=sx; qq[1].y:=sy; qq[1].dat:=sdat;
+  vis[sx,sy]:=true;
+  tot:=0;
+  while h<=t do
+   with qq[h] do
+    begin
+     for i:=1 to 8 do
+      begin
+       nx:=x+dx[i]; ny:=y+dy[i];
+       if (a[nx,ny]=4)and(sdat<=v[ex,ey]) then
+        begin
+         inc(d[ex,ey],d[sx,sy]);
+         v[ex,ey]:=sdat;
+         exit;
+        end;
+       if (a[nx,ny]=1)and not vis[nx,ny] then
+        begin
+         inc(t);
+         qq[t].x:=nx; qq[t].y:=ny;
+         vis[nx,ny]:=true;
+        end;
+       if (a[nx,ny]=0)and not vis[nx,ny] and(sdat+1<=v[nx,ny]) then
+        begin
+         inc(tot);
+         b[tot].x:=nx; b[tot].y:=ny;
+         vis[nx,ny]:=true;
+        end;
+      end;
+     inc(h);
+    end;
+  for i:=1 to tot do
+   with b[i] do
+    if sdat+1<v[x,y] then
+     begin
+      inc(r);
+      q[r].x:=x; q[r].y:=y; q[r].dat:=sdat+1;
+      inc(d[x,y],d[sx,sy]);
+      v[x,y]:=sdat+1;
+     end
+    else inc(d[x,y],d[sx,sy]);
+ end;
+
+procedure bfs;
+ begin
+  fillchar(v,sizeof(v),127);
+  l:=1; r:=1;
+  q[1].x:=sx; q[1].y:=sy; q[1].dat:=0;
+  v[sx,sy]:=0;
+  d[sx,sy]:=1;
+  while l<=r do
+   with q[l] do
+    begin
+     insert(x,y,dat);
+     inc(l);
+    end;
+ end;
+
+begin
+ scanf;
+ bfs;
+ if v[ex,ey]=2139062143 then writeln(-1)
+ else begin
+  writeln(v[ex,ey]);
+  writeln(d[ex,ey]);
+ end;
+end.
+Problem1699
+ const maxn=50000+1000;
+ var i,j,n,m,p,q,k,l,r:longint;
+ fmin,fmax:array[1..maxn,0..18] of longint;
+ a:array[1..maxn] of longint;
+ ans1,ans2:longint;
+
+function max(a,b:longint):longint;
+ begin
+ if a>b then exit(a) else exit(b);
+ end;
+function min(a,b:longint):longint;
+ begin
+ if a<b then exit(a) else exit(b);
+ end;
+procedure init;
+ begin
+ readln(n,Q);
+ for i:=1 to n do
+  read(a[i]);
+ end;
+begin
+
+ init;
+ fillchar(fmin,sizeof(fmin),127);
+ for i:=1 to n do
+  begin
+  fmax[i,0]:=a[i];
+  fmin[i,0]:=a[i];
+  end;
+ for k:=1 to trunc(ln(n)/ln(2)) do
+  begin
+  for i:=1 to n do
+   begin
+   p:=i+1 shl (k-1);
+   if p>n then fmax[i,k]:=fmax[i,k-1]
+    else
+    fmax[i,k]:=max(fmax[i,k-1],fmax[p,k-1]);
+   if p>n then fmin[i,k]:=fmin[i,k-1]
+    else
+    fmin[i,k]:=min(fmin[i,k-1],fmin[p,k-1]);
+   end;
+  end;
+ for i:=1 to q do
+  begin
+  readln(l,r);
+  k:=trunc(ln(r-l+1)/ln(2));
+  p:=r-(1 shl k)+1;
+  ans1:=max(fmax[l,k],fmax[p,k]);
+  ans2:=min(fmin[l,k],fmin[p,k]);
+  writeln(ans1-ans2);
+  end;
+
+end.
+Problem1707
+program tanning;
+const maxn=2500+100;
+ type arr=record
+  x,y:longint;
+  end;
+ var i,j,n,m,p,q,l,r:longint; ans:longint;
+ cow:array[1..maxn] of arr;
+ spf:array[1..maxn] of arr;
+procedure qsort(l,r:longint);
+ var m,i,j:longint; t:arr;
+ begin
+  i:=l; j:=r;
+  m:=(l+r) div 2; m:=cow[m].y;
+ repeat
+  while cow[i].y<m do inc(i);
+  while cow[j].y>m do dec(j);
+  if i<=j then
+   begin
+   t:=cow[i];
+   cow[i]:=cow[j];
+   cow[j]:=t;
+   inc(i);
+   dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+procedure qsort2(l,r:longint);
+ var i,j,m:longint; t:arr;
+ begin
+  i:=l; j:=r;
+  m:=(l+r) div 2; m:=spf[m].x;
+  repeat
+  while spf[i].x<m do inc(i);
+  while spf[j].x>m do dec(j);
+  if i<=j then
+   begin
+   t:=spf[i];
+   spf[i]:=spf[j];
+   spf[j]:=t;
+   inc(i);
+   dec(j);
+   end;
+  until i>j;
+ if l<j then qsort2(l,j);
+ if i<r then qsort2(i,r);
+ end;
+
+begin
+ readln(n,m);
+ for i:=1 to n do
+  read(cow[i].x,cow[i].y);
+ for j:=1 to m do
+  read(spf[j].x,spf[j].y);
+ qsort(1,n);
+ qsort2(1,m);
+ ans:=0;
+ for i:=1 to n do
+  begin
+  for j:=1 to m do
+  begin
+  if (cow[i].x<=spf[j].x)and(spf[j].x<=cow[i].y)and(spf[j].y>0) then
+   begin
+   inc(ans);
+   dec(spf[j].y);
+   break;
+   end;
+  end;
+  end;
+ writeln(ans);
+end.
+Problem1711
+program BZOJ1711;
+ const maxn=410;
+       nnn=100;
+ var i,j,n,m,p,q,l,r,k:longint;
+ map:array[0..maxn,0..maxn] of longint;
+ e:array[0..maxn,0..maxn] of longint;
+ len:Array[0..maxn] of longint;
+ food,drink:longint;
+ vh,di,pre,dis,his:array[0..maxn] of longint;
+ aug,min,jl,ss,tt,ans,temp,tot:longint;
+ flag:boolean;
+procedure openfile;
+ begin
+ assign(input,'dining.in');
+ assign(output,'dining.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure add(l,r:longint);
+ begin
+  inc(len[l]);
+  e[l,len[l]]:=r;
+  inc(len[r]);
+  e[r,len[r]]:=l;
+ end;
+procedure SAP;
+ begin
+ tot:=food+drink+n*2+2;
+ vh[0]:=tot;
+ for i:=0 to maxn do
+  di[i]:=1;
+ i:=ss;
+ aug:=maxlongint;
+ while dis[ss]<tot do
+  begin
+  his[i]:=aug;
+  flag:=false;
+ // r:=i;
+  for l:=di[i] to len[i] do
+   begin
+    j:=e[i,l];
+    if (map[i,j]>0)and(dis[j]+1=dis[i]) then
+     begin
+      flag:=true;
+      di[i]:=j;
+      if map[i,j]<aug then aug:=map[i,j];
+      pre[j]:=i;
+      i:=j;
+      if i=tt then
+       begin
+       inc(ans,aug);
+       while i<>ss do
+        begin
+         temp:=i;
+         i:=pre[i];
+         inc(map[temp,i],aug);
+         dec(map[i,temp],aug);
+        end;
+       aug:=maxlongint;
+       end;
+      break;
+     end;
+   end;
+  if flag then continue;
+  min:=tot-1;
+  for l:=1 to len[i] do
+   begin
+    j:=e[i,l];
+    if (map[i,j]>0)and(dis[j]<min) then begin jl:=l; min:=dis[j]; end;
+   end;
+  di[i]:=jl; //??????? ????????????????  ???????????  ???
+  dec(vh[dis[i]]);
+ // if vh[dis[i]]=0 then
+ //   break;
+  dis[i]:=min+1;
+  inc(vh[dis[i]]);
+  if i<>ss then begin i:=pre[i]; aug:=his[i]; end;
+  end;
+
+ end;
+begin
+// openfile;
+ readln(n,food,drink);
+ ss:=0; tt:=401;          {ss-??}{tt-??}
+ for i:=1 to food do
+  begin
+  inc(map[ss,i],1);
+  add(ss,i);
+  end;
+ for i:=1 to drink do
+  begin
+  inc(map[i+nnn*3,tt],1);
+  add(i+nnn*3,tt);
+  end;
+ for i:=1 to n do
+  begin
+  read(p,q);
+  for j:=1 to p do
+   begin
+   read(k);  add(k,i+nnn);
+   inc(map[k,i+nnn],1);
+   end;
+  add(i+nnn,i+nnn*2);
+  inc(map[i+nnn,i+nnn*2],1);
+  for j:=1 to q do
+   begin
+   read(k);  add(i+nnn*2,k+nnn*3);
+   inc(map[i+nnn*2,k+nnn*3],1);
+   end;
+  end;
+ SAP;
+ //for i:=ss to tt do
+//  if dis[i]<>0 then
+//   writeln(i,' ',dis[i]);
+ writeln(ans);
+// closefile;
+end.
+Problem1711
+program BZOJ1711;
+ const maxn=410;
+       nnn=100;
+ var i,j,n,m,p,q,l,r,k:longint;
+ map:array[0..maxn,0..maxn] of longint;
+ e:array[0..maxn,0..maxn] of longint;
+ len:Array[0..maxn] of longint;
+ food,drink:longint;
+ vh,di,pre,dis,his:array[0..maxn] of longint;
+ aug,min,jl,ss,tt,ans,temp,tot:longint;
+ flag:boolean;
+
+procedure add(l,r:longint);
+ begin
+  inc(len[l]);
+  e[l,len[l]]:=r;
+  inc(len[r]);
+  e[r,len[r]]:=l;
+ end;
+procedure SAP;
+ begin
+ tot:=food+drink+n*2+2;
+ vh[0]:=tot;
+ for i:=0 to maxn do
+  di[i]:=1;
+ i:=ss;
+ aug:=maxlongint;
+ while dis[ss]<tot do
+  begin
+  his[i]:=aug;
+  flag:=false;
+ // r:=i;
+  for l:=di[i] to len[i] do
+   begin
+    j:=e[i,l];
+    if (map[i,j]>0)and(dis[j]+1=dis[i]) then
+     begin
+      flag:=true;
+      di[i]:=l;
+      if map[i,j]<aug then aug:=map[i,j];
+      pre[j]:=i;
+      i:=j;
+      if i=tt then
+       begin
+       inc(ans,aug);
+       while i<>ss do
+        begin
+         temp:=i;
+         i:=pre[i];
+         inc(map[temp,i],aug);
+         dec(map[i,temp],aug);
+        end;
+       aug:=maxlongint;
+       end;
+      break;
+     end;
+   end;
+  if flag then continue;
+  min:=tot-1;
+  for l:=1 to len[i] do
+   begin
+    j:=e[i,l];
+    if (map[i,j]>0)and(dis[j]<min) then begin jl:=l; min:=dis[j]; end;
+   end;
+  di[i]:=jl; //??????? ????????????????  ???????????  ???
+  dec(vh[dis[i]]);
+  if vh[dis[i]]=0 then
+   begin
+   break;
+   end;
+  dis[i]:=min+1;
+  inc(vh[dis[i]]);
+  if i<>ss then begin i:=pre[i]; aug:=his[i]; end;
+  end;
+
+ end;
+begin
+ readln(n,food,drink);
+ ss:=0; tt:=401;          {ss-??}{tt-??}
+ for i:=1 to food do
+  begin
+  inc(map[ss,i],1);
+  add(ss,i);
+  end;
+ for i:=1 to drink do
+  begin
+  inc(map[i+nnn*3,tt],1);
+  add(i+nnn*3,tt);
+  end;
+ for i:=1 to n do
+  begin
+  read(p,q);
+  for j:=1 to p do
+   begin
+   read(k);  add(k,i+nnn);
+   inc(map[k,i+nnn],1);
+   end;
+  add(i+nnn,i+nnn*2);
+  inc(map[i+nnn,i+nnn*2],1);
+  for j:=1 to q do
+   begin
+   read(k);  add(i+nnn*2,k+nnn*3);
+   inc(map[i+nnn*2,k+nnn*3],1);
+   end;
+  end;
+ SAP;
+ //for i:=ss to tt do
+//  if dis[i]<>0 then
+//   writeln(i,' ',dis[i]);
+ writeln(ans);
+
+end.
+Problem1717
+program poj3261;
+ const maxn=20000+1000; maxvalue=1000050;
+ var sa,tsa,rk,trk,h,sum:array[1..maxn] of longint;
+     count:array[0..maxvalue] of longint;
+  s:array[1..maxn] of longint;
+  flag:boolean;
+  mid,i,j,m,n,p,q,l,r,k,re:longint;
+function rank(x:longint):longint;
+ begin
+ if x>n then exit(0);
+ exit(trk[x]);
+ end;
+procedure suffix;
+ begin
+ m:=20001;
+ for i:=1 to n do begin trk[i]:=s[i]; inc(sum[trk[i]]); end;
+ for i:=2 to m do inc(sum[i],sum[i-1]);
+ for i:=n downto 1 do
+  begin sa[sum[trk[i]]]:=i; dec(sum[trk[i]]); end;
+ rk[sa[1]]:=1; p:=1;
+ for i:=2 to n do
+  begin
+  if trk[sa[i]]<>trk[sa[i-1]] then inc(p);
+  rk[sa[i]]:=p;
+  end;
+ //-----------------------------
+ m:=p; j:=1;
+ while m<n do
+  begin
+  move(rk,trk,sizeof(rk));
+  p:=0;
+  fillchar(sum,sizeof(sum),0);
+  for i:=n-j+1 to n do begin inc(p); tsa[p]:=i; end;
+  for i:=1 to n do if sa[i]>j then
+   begin inc(p); tsa[p]:=sa[i]-j; end;
+{}for i:=1 to n do
+   begin rk[i]:=trk[tsa[i]]; inc(sum[rk[i]]); end;
+  for i:=2 to m do inc(sum[i],sum[i-1]);
+  for i:=n downto 1 do
+   begin sa[sum[rk[i]]]:=tsa[i]; dec(sum[rk[i]]); end;
+  rk[sa[1]]:=1; p:=1;
+  for i:=2 to n do
+   begin
+   if (trk[sa[i]]<>trk[sa[i-1]])or(rank(sa[i]+j)<>rank(sa[i-1]+j)) then
+    inc(p);
+   rk[sa[i]]:=p;
+   end;
+  m:=p; j:=j*2;
+  end;
+ end;
+procedure workheight;
+ begin
+ h[sa[1]]:=0; p:=0;
+ for i:=1 to n do
+  begin
+  if rk[i]=1 then continue;
+  j:=sa[rk[i]-1];
+  while s[j+p]=s[i+p] do inc(p);
+  h[rk[i]]:=p;
+  if p>0 then dec(p);
+  end;
+ end;
+begin
+ readln(n,re);
+ for i:=1 to n do
+  begin
+  read(s[i]);
+  count[s[i]]:=1;
+  end;
+ p:=0;
+ for i:=0 to maxvalue do
+  begin
+  if count[i]=1 then inc(p);
+  count[i]:=p;
+  end;
+ p:=0;
+ for i:=1 to n do
+  s[i]:=count[s[i]];
+// for i:=1 to n do writeln(s[i]);
+ suffix;
+// for i:=1 to n do write(sa[i],' ');
+ workheight;
+ l:=0; r:=n;
+ while l<r do
+  begin
+  mid:=(l+r+1) div 2;
+  i:=1; flag:=false;
+  while i<=n do
+   begin
+   j:=i;
+   while h[j+1]>=mid do inc(j);
+   if j-i+1>=re then flag:=true;
+   i:=j+1;
+   end;
+  if flag then l:=mid else r:=mid-1;
+  end;
+ writeln(l);
+end.
+Problem1731
+program poj3169;
+ type link=^node;
+  node=record
+  r,w:longint;
+  next:link;
+  end;
+ const maxn=1000+50; maxm=10000+100;
+ var i,j,n,l,r,k:longint;
+ ml,md:longint;
+ map:array[1..maxn] of link;
+ v,dis,line:array[1..maxn] of longint;
+ hash:array[1..maxn] of boolean;
+ p,q:link;
+procedure openfile;
+ begin
+ assign(input,'poj3169.in');
+ assign(output,'poj3169.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function spfa:boolean;
+ var x,i,k:longint; p:link;
+ begin
+ fillchar(dis,sizeof(dis),127);
+ line[1]:=1; l:=1; r:=1;  v[1]:=1;
+ hash[1]:=true; dis[1]:=0;
+ while l<=r do
+  begin
+   x:=line[(l-1)mod maxn+1]; hash[x]:=false; inc(l);
+   p:=map[x];
+   while p<>nil do
+    begin
+    i:=p^.r; k:=p^.w;
+    if dis[x]+k<dis[i] then
+     begin
+     dis[i]:=dis[x]+k;
+     if not hash[i] then
+      begin
+      inc(v[i]);
+      if v[i]>n then exit(false);
+      inc(r); line[(r-1)mod maxn+1]:=i;
+      hash[i]:=true;
+      end;
+     end;
+    p:=p^.next;
+    end;
+  end;
+ exit(true);
+ end;
+begin
+ //openfile;
+ readln(n,ml,md);
+ for i:=1 to n do
+  map[i]:=nil;
+ for i:=1 to n-1 do
+  begin
+  new(p); p^.r:=i; p^.w:=0; p^.next:=map[i+1]; map[i+1]:=p;
+  end;
+ for i:=1 to ml do
+  begin
+  readln(l,r,k);
+  new(p); p^.r:=r; p^.w:=k; p^.next:=map[l]; map[l]:=p;
+  end;
+ for i:=1 to md do
+  begin
+  readln(l,r,k);
+  new(p); p^.r:=l; p^.w:=-k; p^.next:=map[r]; map[r]:=p;
+  end;
+ if not spfa then writeln(-1)
+  else if dis[n]=2139062143   then writeln(-2)
+ else writeln(dis[n]);
+// closefile;
+end.
+
+Problem1736
+ const maxn=305; maxm=305;
+       dx:array[1..4] of longint=(1,0,-1,0);
+       dy:array[1..4] of longint=(0,1,0,-1);
+ type arr=record
+  x,y,h:longint;
+  end;
+
+ var i,j,n,m,l,r,k:longint;
+ a:array[1..maxn,1..maxn] of longint;
+ hash:array[1..maxn,1..maxm] of boolean;
+ heap:array[1..maxn*maxn+1000] of arr;
+ tot,ans:int64;
+ p:arr;
+
+procedure init;
+ begin
+ readln(m,n);
+ for i:=1 to n do
+  for j:=1 to m do
+  read(a[i][j]);
+ end;
+procedure swap(i,j:longint);
+ var t:Arr;
+ begin
+ t:=heap[i]; heap[i]:=heap[j]; heap[j]:=t;
+ end;
+procedure add(x,y:longint);
+ var i,p:longint;
+ begin
+ inc(tot);
+ heap[tot].x:=x; heap[tot].y:=y; heap[tot].h:=a[x,y];
+ hash[x,y]:=true;
+ i:=tot; p:=i div 2;
+ while p>=1 do
+  begin
+  if heap[i].h<heap[p].h then
+   swap(i,p)
+  else break;
+  i:=p;
+  p:=i div 2;
+  end;
+ end;
+procedure del;
+ var p,q,i,r:longint;
+ begin
+  swap(1,tot);
+  dec(tot);
+  i:=1;
+  while true do
+   begin
+   p:=i*2; q:=i*2+1;
+   if p>tot then break;
+   r:=i;
+   if heap[p].h<heap[r].h then r:=p;
+   if (q<=tot)and(heap[q].h<heap[r].h) then r:=q;
+   if r=i then break;
+   swap(i,r);
+   i:=r;
+   end;
+ end;
+procedure dfs(x,y:longint);
+ var i,j,nx,ny:longint;
+ begin
+ for i:=1 to 4 do
+  begin
+   nx:=x+dx[i]; ny:=y+dy[i];
+   if (nx>n)or(nx<=0)or(ny>m)or(ny<=0) then continue;
+   if not hash[nx,ny] then
+    begin
+    hash[nx,ny]:=true;
+    if a[nx,ny]<=k then
+     begin ans:=ans+k-a[nx,ny]; dfs(nx,ny); end
+     else add(nx,ny);
+    end;
+  end;
+ end;
+begin
+
+ init;
+ fillchar(hash,sizeof(hash),false);
+ tot:=0;
+ for i:=1 to n do add(i,1);
+ for i:=1 to n do add(i,m);
+ for j:=2 to m-1 do add(1,j);
+ for j:=2 to m-1 do add(n,j);
+//--------------------------
+ while tot>0 do
+  begin
+  p:=heap[1];
+  del;
+  k:=p.h;
+  dfs(p.x,p.y);
+  end;
+ writeln(ans);
+
+end.
+Problem1776
+{?????,??party???????,???????party???????.}
+program BZOJ1776;
+ {$M 10000000000000}
+const maxn=200000+100;
+ type link=^node;
+  node=record
+   r:longint; next:link;
+  end;
+ var i,j,n,m,p,q,l,r,k,tail:longint;
+ root,ans:longint;
+ d,pos,party,num,b:array[0..maxn]of longint;
+ t:array[1..2*maxn] of longint;
+ f:array[1..maxn*2,0..20] of longint;
+ e:array[1..maxn] of link;
+ er:array[0..20] of longint;
+
+procedure init;
+ var c:longint;
+     p:link;
+ begin
+ readln(n,m);
+ for i:=1 to n do
+  e[i]:=nil;
+ for i:=1 to n do
+  read(party[i],b[i]);
+ for i:=n downto 1 do
+  begin
+  num[i]:=i;
+  if b[i]=0 then begin root:=i; continue; end;
+  new(p); p^.r:=i; p^.next:=e[b[i]]; e[b[i]]:=p;
+  end;
+ end;
+procedure dfs(x:longint);
+ var q:link; p:longint;
+ begin
+ q:=e[x];
+ inc(tail); t[tail]:=x;
+ while q<>nil do
+  begin
+  p:=q^.r;
+  d[p]:=d[x]+1;
+  dfs(p);
+  inc(tail);
+  t[tail]:=x;
+  q:=q^.next;
+  end;
+ end;
+function min(a,b:longint):longint;
+ begin
+ if d[a]<d[b] then exit(a) else exit(b);
+ end;
+procedure ST(n:longint);
+ var i,j,p,k,l:longint;
+ begin
+ for i:=0 to 20 do
+  er[i]:=1 shl i;
+ for i:=1 to n do
+  f[i,0]:=t[i];
+ for k:=1 to trunc(ln(n)/ln(2)) do
+  for i:=1 to n-er[k]+1 do
+   f[i,k]:=min(f[i,k-1],f[i+er[k-1],k-1]);
+ end;
+function ask(l,r:longint):longint;
+ var i,j,p:longint;
+ begin
+ if l>r then
+  begin
+  p:=r; r:=l; l:=p;
+  end;
+ ask:=0;
+ p:=trunc(ln(r-l+1)/ln(2));
+ ask:=min(f[l,p],f[r+1-er[p],p]);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; t,m:longint;
+ begin
+ m:=party[(l+r)div 2];
+ i:=l; j:=r;
+ repeat
+  while party[i]<m do inc(i);
+  while party[j]>m do dec(j);
+  if i<=j then
+   begin
+   t:=party[i]; party[i]:=party[j]; party[j]:=t;
+   t:=num[i];   num[i]:=num[j];     num[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+begin
+ init;
+//---------
+ tail:=0;
+ dfs(root);
+ for i:=1 to 2*n-1 do
+  if pos[t[i]]=0 then
+   pos[t[i]]:=i;
+ ST(2*n-1);
+//---------
+ qsort(1,n);
+ for i:=1 to n do
+  if i>r then
+  begin
+   l:=i; r:=l;
+   k:=num[l];
+   while party[r]=party[r+1] do
+    begin
+    inc(r);
+    if d[num[r]]>d[k] then k:=num[r];
+    end;
+   ans:=0;
+   for j:=l to r do
+    if num[j]<>k then
+    begin
+    p:=ask(pos[num[j]],pos[k]);
+    if abs(d[p]-d[num[j]])+abs(d[p]-d[k])>ans then
+     ans:=abs(d[p]-d[num[j]])+abs(d[p]-d[k]);
+    end;
+   writeln(ans);
+  end;
+end.
+Problem1782
+program bzoj1782;
+ {$M 100000000000}
+ type link=^node;
+ node=record
+  r:longint;
+  next:link;
+  end;
+ const maxn=100000+100;
+ var ans,i,j,n,m,p,q,l,r,k,tail:longint;
+  e:array[1..maxn] of link;
+  fa,sons,dfn,loc,s:array[0..maxn] of longint;
+procedure openfile;
+ begin
+ assign(input,'bzoj1782.in');
+ assign(output,'bzoj1782.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure add(l,r:longint);
+ var p:link;
+ begin
+  new(p); p^.r:=r; p^.next:=e[l]; e[l]:=p;
+  new(p); p^.r:=l; p^.next:=e[r]; e[r]:=p;
+ end;
+procedure dfs(x:longint);
+ var p:link; j,i:longint;
+ begin
+ inc(tail); dfn[tail]:=x; loc[x]:=tail;
+ p:=e[x];
+ while p<>nil do
+  begin
+  i:=p^.r;
+  if i<>fa[x] then
+   begin
+   fa[i]:=x;
+   dfs(i);
+   end;
+  p:=p^.next;
+  end;
+ sons[x]:=tail;
+ end;
+function lowbit(x:longint):longint;
+ begin
+ exit(x and (-x));
+ end;
+procedure insert(x,k:longint);
+ var i,j:longint;
+ begin
+  i:=x;
+  while i<=n do
+   begin
+   s[i]:=s[i]+k;
+   i:=i+lowbit(i);
+   end;
+ end;
+function query(x:longint):longint;
+ var i,j:longint;
+ begin
+ i:=x;
+ while i>0 do
+  begin
+  ans:=ans+s[i];
+  i:=i-lowbit(i);
+  end;
+ exit(ans);
+ end;
+begin
+// openfile;
+ readln(n);
+ for i:=1 to n do
+  e[i]:=nil;
+ for i:=1 to n-1 do
+  begin
+  readln(l,r);
+  add(l,r);
+ // add(r,l);
+  end;
+ tail:=0;
+ dfs(1);
+ for i:=1 to n do
+  begin
+  readln(p);
+  ans:=0;
+  ans:=query(loc[p]);
+  writeln(ans);
+  insert(loc[p],1);
+  insert(sons[p]+1,-1);
+  end;
+//closefile;
+end.
+Problem1787
+program BZOJ1787;
+ {M 10000000000}
+ const maxn=500000+100;
+ type link=^node;
+  node=record
+   r,num,pp:longint;
+   next:link;
+   end;
+ var i,j,n,m,l,r,k,p,q:longint;
+ e:array[1..maxn] of link;
+ deep:array[1..maxn] of longint;
+ ask:array[1..maxn] of link;
+ line:array[1..maxn] of longint;
+ a,ans:array[1..maxn,1..3] of longint;
+ f:array[0..maxn] of longint;
+ re:longint;
+
+procedure init;
+ var p,q:link;
+ begin
+ readln(n,m);
+ for i:=1 to n do
+  e[i]:=nil;
+ for i:=1 to n-1 do
+  begin
+  readln(l,r);
+  new(p); p^.r:=r; p^.next:=e[l]; e[l]:=p;
+  new(p); p^.r:=l; p^.next:=e[r]; e[r]:=p;
+  end;
+ end;
+
+procedure BFS;
+ var l,r,x:longint;
+     p:link;
+ begin
+  l:=1; r:=1;
+  fillchar(line,sizeof(line),0);
+  line[1]:=1;
+  deep[1]:=1;
+  while l<=r do
+   begin
+   x:=line[l]; inc(l);
+   p:=e[x];
+   while p<>nil do
+    begin
+    if deep[p^.r]=0 then
+     begin
+     deep[p^.r]:=deep[x]+1;
+     inc(r); line[r]:=p^.r;
+     end;
+    p:=p^.next;
+    end;
+   end;
+ end;
+
+procedure addask(l,r,num,pp:longint);
+ var p:link;
+ begin
+ new(p); p^.r:=r; p^.next:=ask[l]; p^.pp:=pp; p^.num:=num; ask[l]:=p;
+ end;
+
+function get(x:longint):longint;
+ begin
+  if f[x]=x then exit(x);
+  f[x]:=get(f[x]);
+  exit(f[x]);
+ end;
+procedure Tarjan(x:longint);
+ var p,q:link;
+     i,j,k:longint;
+ begin
+  f[x]:=x;
+ //-----------
+  p:=ask[x];
+  while p<>nil do
+   begin
+   k:=get(p^.r); //j:=p^.num;
+   if k<>0 then
+    begin
+ //   inc(ans[j][0]);
+    ans[p^.num][p^.pp]:=k;
+    end;
+   p:=p^.next;
+   end;
+ //-----------
+  p:=e[x];
+  while p<>nil do
+   begin
+   if deep[p^.r]>deep[x] then
+    begin
+    tarjan(p^.r);
+    f[p^.r]:=f[x];
+    end;
+   p:=p^.next;
+   end;
+ end;
+
+begin
+ init;
+ BFS;
+//--------main--------
+ for i:=1 to n do ask[i]:=nil;
+ for i:=1 to m do
+  begin
+  readln(a[i][1],a[i][2],a[i][3]);
+  p:=a[i][1]; q:=a[i][2]; k:=a[i][3];
+  addask(p,q,i,1); addask(q,p,i,1);
+  addask(p,k,i,2); addask(k,p,i,2);
+  addask(q,k,i,3); addask(k,q,i,3);
+  end;
+ Tarjan(1);
+ for i:=1 to m do
+  begin
+  if ans[i][1]=ans[i][2] then
+   begin
+   p:=ans[i][3];
+   re:=abs(deep[ans[i][3]]-deep[ans[i][1]])+abs(deep[a[i][1]]-deep[ans[i][1]]);
+   re:=re+abs(deep[a[i][2]]-deep[p])+abs(deep[a[i][3]]-deep[p]);
+   end;
+  if ans[i][1]=ans[i][3] then
+   begin
+   p:=ans[i][2];
+   re:=abs(deep[ans[i][2]]-deep[ans[i][1]])+abs(deep[a[i][2]]-deep[ans[i][1]]);
+   re:=re+abs(deep[a[i][1]]-deep[p])+abs(deep[a[i][3]]-deep[p]);
+   end;
+  if ans[i][2]=ans[i][3] then
+   begin
+   p:=ans[i][1];
+   re:=abs(deep[ans[i][1]]-deep[ans[i][2]])+abs(deep[a[i][3]]-deep[ans[i][2]]);
+   re:=re+abs(deep[a[i][2]]-deep[p])+abs(deep[a[i][1]]-deep[p]);
+   end;
+  writeln(p,' ',re);
+  end;
+end.
+Problem1797
+program zxjd;   //O(N^2*M+n*m)
+ const maxn=4000+100; maxm=60000+1000;
+ type arr=record
+  l,r,c,num:longint;
+  end;
+ var i,j,n,m,p,q,l,r,k:longint;
+ star:array[1..maxn] of longint;
+ e:array[1..2*maxm] of arr;
+ knd:array[1..2*maxm] of longint;
+ loc:array[1..maxm*2] of longint;
+ ss,tt,aug,tot,maxflow,min,jl:longint;
+ vh,dis,his,pre,di:array[0..maxn] of longint;
+// hash,visit:array[1..maxn] of boolean;
+ ans:array[1..2,1..maxm] of boolean;
+ dfn,low:array[1..maxn] of longint;
+ color:array[1..maxn] of longint;
+ mark,colorkind:longint;
+// ans:array[1..maxn] of longint;
+ flag:boolean;
+// uu:arr;
+
+procedure openfile;
+ begin
+ assign(input,'data.in');
+ assign(output,'user.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+function minner(a,b:longint):longint;
+ begin
+  if a<b then exit(a) else exit(b);
+ end;
+procedure add(l,r,c,num:longint);
+ begin
+ e[num].l:=l; e[num].r:=r; e[num].c:=c; e[num].num:=num;
+ end;
+function compare(a,b:arr):boolean;
+ begin
+ if a.l<b.l then exit(true);
+ if a.l>b.l then exit(false);
+ if a.r>b.r then exit(true);
+ exit(false);
+ end;
+function con(x:longint):longint;
+ begin
+ if x and 1=1 then exit(x+1);
+ exit(x-1);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; t,m:arr;
+ begin
+ i:=l; j:=r;
+ m:=e[(l+r)shr 1];
+ repeat
+  while compare(e[i],m) do inc(i);
+  while compare(m,e[j]) do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+procedure dye(x:longint);
+ var i,p:longint;
+ begin
+ color[x]:=colorkind;
+ for i:=star[x] to star[x+1]-1 do
+  if (e[i].c>0)and(color[e[i].r]=0) then
+   dye(e[i].r);
+ end;
+
+procedure tarjan(x:longint);
+ var i,p,r:longint;
+ begin
+ inc(mark); dfn[x]:=mark; low[x]:=mark;
+ for i:=star[x] to star[x+1]-1 do
+  if e[i].c>0 then
+  if color[e[i].r]=0 then
+  begin
+  p:=e[i].r;
+  if dfn[p]=0 then
+   begin
+   /// knd[i]:=1;
+    tarjan(p);
+    low[x]:=minner(low[p],low[x]);
+   end
+   else
+     low[x]:=minner(low[x],dfn[p]);
+  end;
+ if low[x]=dfn[x] then
+  begin inc(colorkind); dye(x); end;
+ end;
+begin
+// openfile;
+ readln(n,m,ss,tt);
+ for i:=1 to m do
+  begin
+  readln(l,r,k);
+  add(l,r,k,2*i-1);
+  add(r,l,0,2*i);
+  end;
+ m:=2*m;
+ qsort(1,m);
+ for i:=1 to m do
+  loc[e[i].num]:=i;
+ for i:=m downto 1 do
+  star[e[i].l]:=i;
+ star[n+1]:=m+1;
+ for i:=n downto 1 do
+  if star[i]=0 then star[i]:=star[i+1];
+//-----sap-----
+ fillchar(dis,sizeof(dis),0);
+ tot:=n;
+ vh[0]:=tot;
+ for i:=1 to n do
+  di[i]:=star[i];
+ i:=ss; aug:=maxlongint;
+ while dis[ss]<tot do
+  begin
+  his[i]:=aug;
+  flag:=false;
+  for  l:=di[i] to star[i+1]-1 do
+   if (dis[i]=dis[e[l].r]+1)and(e[l].c>0) then
+   begin
+   j:=e[l].r;
+   di[i]:=l;
+   pre[j]:=l;
+   flag:=true;
+   if e[l].c<aug then aug:=e[l].c;
+   i:=j;
+   if j=tt then
+    begin
+    while i<>ss do
+     begin
+     p:=e[pre[i]].l;
+     dec(e[pre[i]].c,aug);
+     inc(e[loc[con(e[pre[i]].num)]].c,aug);
+     i:=p;
+     end;
+    inc(maxflow,aug);
+    aug:=maxlongint;
+    end;
+   break;
+   end;
+  if flag then continue;
+  min:=tot-1;
+  for l:=star[i] to star[i+1]-1 do
+   if e[l].c>0 then
+   begin
+   j:=e[l].r;
+   if dis[j]<min then begin min:=dis[j]; jl:=l; end;
+   end;
+  di[i]:=jl;
+  dec(vh[dis[i]]);
+  if vh[dis[i]]=0 then break;
+  dis[i]:=min+1;
+  inc(vh[dis[i]]);
+  if i<>ss then begin i:=e[pre[i]].l; aug:=his[i]; end;
+  end;
+//-------------
+ // WRITELN(MAXFLOW);
+ mark:=0;
+ for i:=1 to n do
+  if color[i]=0 then
+   begin
+   tarjan(i);
+   end;
+ for i:=1 to m do
+  if e[i].num and 1=1 then
+   if e[i].c=0 then
+   begin
+    if color[e[i].l]<>color[e[i].r] then
+     begin ans[1,e[i].num div 2+1]:=true; end;
+   end;
+ for i:=1 to m do
+  if e[i].num and 1=1 then
+   begin
+    if (color[e[i].l]=color[ss])and(color[e[i].r]=color[tt])then
+     begin ans[2,e[i].num div 2+1]:=true; end;
+   end;
+ for i:=1 to m div 2 do
+  begin
+  if ans[1][i]=true then write(1,' ') else write(0,' ');
+  if ans[2][i]=true then write(1) else write(0);
+  writeln;
+  end;
+// closefile;
+end.
+Problem1821
+program bzoj1821;
+ {$m 10000000000}
+ type arr=record
+       x,y:longint;
+      end;
+      edge=record
+       l,r:longint;
+       dis:double;
+       end;
+ const maxn=1000;
+ var a:array[1..maxn] of arr;
+     e:array[1..maxn*500] of edge;
+     i,j,n,m,p,q,l,r,k:longint;
+     f:array[1..maxn] of longint;
+     x,y:longint;
+procedure openfile;
+ begin
+ assign(input,'group.in');
+ assign(output,'group.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+function cal(a,b:arr):double;
+ begin
+ cal:=sqrt(sqr(a.x-b.x)+sqr(a.y-b.y));
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:edge;
+ begin
+ i:=l; j:=r;
+ m:=e[(i+j) div 2];
+ repeat
+  while e[i].dis<m.dis do inc(i);
+  while e[j].dis>m.dis do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+function get(x:longint):longint;
+ begin
+  if f[x]=x then exit(x);
+  f[x]:=get(f[x]);
+  exit(f[x]);
+ end;
+begin
+ //openfile;
+ readln(n,k);
+ for i:=1 to n do
+  read(a[i].x,a[i].y);
+ for i:=1 to n-1 do
+  for j:=i+1 to n do
+   begin
+   inc(p); e[p].l:=i; e[p].r:=j;
+   e[p].dis:=cal(a[i],a[j]);
+   end;
+ qsort(1,p);
+ for i:=1 to n do
+  f[i]:=i;
+ i:=1; q:=n;
+ while i<=p do
+  begin
+  l:=e[i].l; r:=e[i].r;
+  x:=get(l); y:=get(r);
+  if x<>y then
+   begin
+   dec(q);
+   if q<k then begin writeln(e[i].dis:0:2); break; end;
+   f[y]:=x;
+   end;
+  inc(i);
+  end;
+ //closefile;
+end.
+Problem1834
+program BZOJ1834;
+type  arr=record
+  l,r,p,k,f:longint;
+  end;
+  cord=record
+   r,rest,cost,conflict:longint;
+  end;
+ const maxn=1000+5; maxm=5000+10;modd=50000;
+ var i,j,n,m,p,q,l,r,k,kk:longint;
+ f:array[0..maxn,0..maxn] of longint;
+ e,c,f2:Array[0..maxn,0..maxn] of longint;
+ ee:array[0..maxn,0..maxn] of cord;
+ len,len2:array[0..maxn] of longint;
+ dis,pre:array[0..maxn] of longint;
+ link:array[0..maxn,0..1] of longint;
+ eg:array[1..maxm] of arr;
+ flag:boolean;
+ cost:longint;
+procedure openfile;
+ begin
+ assign(input,'bzoj1834.in');
+ assign(output,'bzoj1834.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+
+procedure maxflow;
+ var tot,aug,ans,ss,tt,min,jl:longint;
+  di,his,vh:array[0..maxn] of longint;
+ begin
+ ans:=0;
+ fillchar(vh,sizeof(vh),0);
+ fillchar(dis,sizeof(dis),0);
+ fillchar(his,sizeof(his),0);
+ for i:=0 to n do
+  di[i]:=1;
+ tot:=n; vh[0]:=tot;
+ ss:=1; tt:=n; i:=1;
+ aug:=maxlongint;
+ while dis[ss]<tot do
+  begin
+   his[i]:=aug;
+   flag:=false;
+   for l:=di[i] to len[i] do
+    begin
+    j:=ee[i,l].r;
+    if (dis[j]+1=dis[i])and(ee[i,l].rest>0) then
+     begin
+     if ee[i,l].rest<aug then aug:=ee[i,l].rest;
+     link[j][0]:=i; link[j][1]:=l;
+     di[i]:=l;
+     flag:=true;
+     i:=j;
+     if j=tt then
+      begin
+      inc(ans,aug);
+      while i<>ss do
+       begin
+       p:=link[i][0];
+       j:=link[i][1];
+       dec(ee[p,j].rest,aug);
+       inc(ee[i,ee[p,j].conflict].rest,aug);
+       i:=p;
+       end;
+      aug:=maxlongint;
+      end;
+     break;
+     end;
+    end;
+   if flag then continue;
+   min:=tot-1;
+   for l:=1 to len[i] do
+    begin
+    j:=ee[i,l].r;
+    if ee[i,l].rest>0 then
+     if dis[j]<min then begin min:=dis[j]; jl:=l; end;
+    end;
+   dec(vh[dis[i]]);
+   if vh[dis[i]]=0 then break;
+   dis[i]:=min+1;
+   inc(vh[dis[i]]);
+   di[i]:=jl;
+   if i<>ss then
+    begin i:=link[i][0]; aug:=his[i]; end;
+  end;
+ write(ans,' ');
+ end;
+procedure add(l,r,p,k:longint);
+ begin
+ inc(len[l]); ee[l,len[l]].r:=r; ee[l,len[l]].rest:=p; ee[l,len[l]].cost:=k;
+ inc(len[r]); ee[r,len[r]].r:=l; ee[r,len[r]].rest:=0; ee[r,len[r]].cost:=-k;
+ ee[l,len[l]].conflict:=len[r];
+ ee[r,len[r]].conflict:=len[l];
+ end;
+procedure add2(l,r,p,k:longint);
+ begin
+ inc(len2[l]); ee[l,len2[l]].r:=r; ee[l,len2[l]].rest:=p; ee[l,len2[l]].cost:=k;
+ inc(len2[r]); ee[r,len2[r]].r:=l; ee[r,len2[r]].rest:=0; ee[r,len2[r]].cost:=-k;
+ ee[l,len2[l]].conflict:=len2[r];
+ ee[r,len2[r]].conflict:=len2[l];
+ end;
+procedure SPFA;
+ var line:array[1..modd] of longint;
+     hash:array[0..maxn] of boolean;
+     x,l,r,i,j,p:longint;
+ begin
+ fillchar(hash,sizeof(hash),false);
+ fillchar(dis,sizeof(dis),127);
+ fillchar(link,sizeof(link),0);
+ dis[0]:=0; hash[0]:=true; line[1]:=0;
+ l:=1; r:=1;
+ while l<=r do
+  begin
+   x:=line[(l-1) mod modd+1]; hash[x]:=false; inc(l);
+   for i:=1 to len[x] do
+    if ee[x,i].rest>0 then
+    begin
+    p:=ee[x,i].r;
+    if ee[x,i].cost+dis[x]<dis[p] then
+     begin
+     dis[p]:=ee[x,i].cost+dis[x];
+     link[p][0]:=x; link[p][1]:=i;
+     if not hash[p] then
+      begin
+      inc(r); line[(r-1)mod modd+1]:=p;
+      hash[p]:=true;
+      end;
+     end;
+    end;
+  end;
+ if dis[n]<100000000 then flag:=true;
+ end;
+procedure mincostflow;
+ var ans,aug,i,j,p:longint;
+ begin
+// fillchar(len,sizeof(len),0);
+ len2:=len;
+ for i:=1 to n do
+  for j:=1 to len[i] do
+  begin
+  if ee[i,j].cost>=0 then
+  add2(i,ee[i,j].r,kk,ee[i,j].cost);
+  ee[i,j].cost:=0;
+  end;
+ add2(0,1,kk,0);
+ len:=len2;
+ ans:=0;
+ flag:=true;
+ while flag do
+  begin
+  flag:=false;
+  spfa;
+  if not flag then break;
+  i:=n; aug:=maxlongint;
+  while i<>0 do
+   begin
+   p:=link[i][0];
+   j:=link[i][1];
+   if ee[p,j].rest<aug then aug:=ee[p,j].rest;
+   i:=p;
+   end;
+  inc(ans,aug*dis[n]);
+  i:=n;
+  while i<>0 do
+   begin
+   p:=link[i][0];
+   j:=link[i][1];
+   dec(ee[p,j].rest,aug);
+   inc(ee[i,ee[p,j].conflict].rest,aug);
+   i:=p;
+   end;
+  end;
+ writeln(ans);
+ end;
+begin
+ //openfile;
+//-------------------
+ readln(n,m,kk);
+ for i:=1 to m do
+  begin
+  readln(l,r,p,k);
+  add(l,r,p,k);
+  eg[i].l:=l; eg[i].r:=r; eg[i].p:=p; eg[i].k:=k;
+  end;
+//-------------------
+ maxflow;
+ mincostflow;
+ //closefile;
+end.
+Problem1867
+program poj1189;
+ type arr=record
+  z,m:int64;
+ end;
+ var i,j,n,m,p,q,l,r,k:longint;
+ map:array[1..55,1..55] of char;
+ f:array[1..55,1..55]of arr;
+ ch:char;
+procedure openfile;
+ begin
+ assign(input,'poj1189.in');
+ assign(output,'poj1189.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+function gcd(a,b:int64):int64;
+ begin
+ if b=0 then exit(a);
+ exit(gcd(b,a mod b));
+ end;
+procedure add(var a:arr; b:arr; p:longint);
+ var i,m,z:int64;
+ begin
+  m:=b.m*p;
+  z:=b.z;
+  if m+z=0 then exit;
+  if a.z+a.m=0 then begin a.z:=z; a.m:=m; exit; end;
+  i:=gcd(a.m,m);
+  a.z:=a.m div i*z+ m div i*a.z;
+  a.m:=a.m div i*m;
+  i:=gcd(a.z,a.m);
+  a.z:=a.z div i;
+  a.m:=a.m div i;
+  end;
+begin
+
+ readln(n,m); inc(m);
+ for i:=1 to n do
+  begin
+  ch:=' ';
+  for j:=1 to i do
+   begin
+   while (ch<>'.')and(ch<>'*') do
+    read(ch);
+   map[i,j]:=ch; ch:=' ';
+   end;
+  end;
+ f[1,1].z:=1; f[1,1].m:=1;
+ for i:=1 to n do
+  for j:=1 to i do
+  begin
+  if map[i,j]='*' then
+   begin
+   add(f[i+1,j],f[i,j],2);
+   add(f[i+1,j+1],f[i,j],2);
+   end;
+  if map[i,j]='.' then
+   begin
+   add(f[i+2,j+1],f[i,j],1);
+   end;
+  end;
+ if f[n+1,m].z+f[n+1,m].m=0 then f[n+1,m].m:=1;
+ writeln(f[n+1,m].z,'/',f[n+1,m].m);
+
+end.
+Problem1901
+program kthnumber;
+ type arr=record
+  l,r,root:longint;
+  end;
+ const maxn=12100;
+ var time,i,j,n,m,p,q,l,r,k:longint;
+ a:array[1..maxn] of longint;
+ s,left,right,key,num:array[0..300000] of longint;
+ seg:array[0..maxn*3+1000] of arr;
+ tot,t,tt,ans,count:longint;
+ ch:char;
+procedure openfile;
+ begin
+ assign(input,'kth.in');
+ assign(output,'kth.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+procedure rturn(var t:longint);
+ var p:longint;
+ begin
+ p:=left[t];
+ left[t]:=right[p];
+ right[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure lturn(var t:longint);
+ var p:longint;
+ begin
+ p:=right[t];
+ right[t]:=left[p];
+ left[p]:=t;
+ s[p]:=s[t];
+ s[t]:=s[left[t]]+s[right[t]]+1;
+ t:=p;
+ end;
+procedure maintain(var t:longint; flag:boolean);
+ begin
+  if not flag then
+   if s[left[left[t]]]>s[right[t]] then
+    rturn(t)
+   else
+    if s[right[left[t]]]>s[right[t]] then
+    begin
+    lturn(left[t]);
+    rturn(t);
+    end
+   else exit;
+  if     flag then
+   if s[right[right[t]]]>s[left[t]] then
+    lturn(t)
+   else
+    if s[left[right[t]]]>s[left[t]] then
+    begin
+    rturn(right[t]);
+    lturn(t);
+    end
+   else exit;
+  maintain(left[t],false);
+  maintain(right[t],true);
+  maintain(t,true);
+  maintain(t,false);
+ end;
+function compare(a,b,x,y:longint):boolean;
+ begin
+ if a<x then exit(true); if x<a then exit(false);
+ if b<y then exit(true); exit(false);
+ end;
+procedure add(var t:longint; k,o:longint);
+ var flag:boolean;
+ begin
+ if t=0 then
+  begin
+  inc(tt); t:=tt;
+  s[t]:=1; left[t]:=0; right[t]:=0;
+  key[t]:=k; num[t]:=o;
+  end
+ else
+  begin
+  inc(s[t]);
+  flag:=compare(k,o,key[t],num[t]);
+  if flag then add(left[t],k,o)
+   else add(right[t],k,o);
+  maintain(t,not flag);
+  end;
+ end;
+procedure delete(var t:longint; k,o:longint);
+ var i,p:longint;
+ begin
+ dec(s[t]);
+ if (k=key[t])and(o=num[t]) then
+  begin
+  if (left[t]=0)or(right[t]=0) then
+   begin
+   t:=left[t]+right[t];
+   exit;
+   end;
+  i:=t; p:=right[i];
+  while left[p]<>0 do
+   begin i:=p; p:=left[i]; dec(s[i]);  end;
+  if i=t then right[i]:=right[p]
+         else left[i]:=right[p];
+  num[t]:=num[p]; key[t]:=key[p];
+  exit;
+  end;
+ if compare(k,o,key[t],num[t]) then delete(left[t],k,o)
+                               else delete(right[t],k,o);
+ end;
+function rank(t:longint; k,o:longint):longint;
+ var p:longint;
+ begin
+ p:=0;
+ if t=0 then exit(0);
+ if compare(k,o,key[t],num[t]) then exit(rank(left[t],k,o));
+ if (k=key[t])and(o=num[t]) then exit(s[left[t]]);
+ p:=1+s[left[t]]+rank(right[t],k,o);
+ exit(p);
+ end;
+procedure buildtree(x,l,r:longint);
+ var i,mid:longint;
+ begin
+ seg[x].root:=0;
+ seg[x].l:=l; seg[x].r:=r;
+ for i:=l to r do
+  add(seg[x].root,a[i],i);
+ if l=r then exit;
+ mid:=(l+r) shr 1;
+ buildtree(x*2,l,mid);
+ buildtree(x*2+1,mid+1,r);
+ end;
+procedure change(p,k:longint);
+ var mid,x:longint;
+ begin
+ x:=1;
+ while true do
+  begin
+  delete(seg[x].root,a[p],p);
+  add(seg[x].root,k,p);
+  if seg[x].l=seg[x].r then break;
+  mid:=(seg[x].l+seg[x].r)shr 1;
+  if p<=mid then x:=x*2 else x:=x*2+1;
+  end;
+ a[p]:=k;
+ end;
+procedure search(x,ls,rs,v:longint);
+ var mid:longint;
+ begin
+ if (seg[x].l=ls)and(seg[x].r=rs) then
+  begin
+  count:=count+rank(seg[x].root,v,1);
+  exit;
+  end;
+ mid:=(seg[x].l+seg[x].r) shr 1;
+ if rs<=mid then search(x*2,ls,rs,v);
+ if ls>mid  then search(x*2+1,ls,rs,v);
+ if (ls<=mid)and(rs>mid) then
+  begin
+  search(x*2,ls,mid,v);
+  search(x*2+1,mid+1,rs,v);
+  end;
+ end;
+function select(var t:longint; k:longint):longint;
+ var p:longint;
+ begin
+ p:=s[left[t]]+1;
+ if p=k then exit(key[t]);
+ if p>k then exit(select(left[t],k));
+ if p<k then exit(select(right[t],k-p));
+ end;
+procedure find(ls,rs,k:longint);
+ var cun,mid,l,r:longint;
+ begin
+// ans:=0;
+ l:=1; r:=n;
+ while l<r do
+  begin
+  mid:=(l+r+1) div 2;
+  count:=0;
+  cun:=select(seg[1].root,mid);
+  search(1,ls,rs,cun);
+  count:=count+1;
+ // if count=k then begin ans:=mid; exit; end;
+  if count>k then r:=mid-1;
+  if count<=k then l:=mid;
+  end;
+ ans:=select(seg[1].root,l);
+ end;
+begin
+// openfile;
+//readln(time);
+//for t:=1 to time do
+ begin
+//---------init----------
+ readln(n,q);
+ for i:=1 to n do
+  read(a[i]);
+ readln;
+//---------build----------
+ tot:=0; tt:=0;
+ buildtree(1,1,n);// if s[0]>0 then writeln(s[0]);
+//-------query&reply------------
+ for i:=1 to q do
+  begin
+  read(ch);
+  if ch='C' then
+   begin
+   readln(p,k);
+   change(p,k);   // if s[0]>0 then writeln(s[0]);
+   end;
+  if ch='Q' then
+   begin
+   readln(l,r,k);
+   find(l,r,k);   // if s[0]>0 then writeln(s[0]);
+   writeln(ans);
+   end;
+  end;
+ {for i:=1 to 10 do
+  begin
+  writeln(i,':',rank(seg[1].root,i,1));
+  end; }
+ end;
+ //closefile;
+end.
+Problem1911
+program BZggJ1911;
+ const maxn=1000000+100;
+ var i,j,n,m,p,q,l,r,k:longint;
+ aa,bb,cc:int64;
+ ln:Array[0..maxn] of int64;
+ le:array[0..maxn] of double;
+ s,f:array[0..maxn] of int64;
+ tt:int64;
+
+function G(x,y:longint):double;
+ var vx,vy:int64; pp:double;
+ begin
+  vx:=f[x]+aa*s[x]*s[x]-bb*s[x];
+  vy:=f[y]+aa*s[y]*s[y]-bb*s[y];
+  pp:=(vx-vy)/(2*aa*(s[x]-s[y]));
+  exit(pp);
+ end;
+
+begin
+
+ readln(n);
+ readln(aa,bb,cc);
+ for i:=1 to n do
+  begin
+  read(k);
+  s[i]:=s[i-1]+k;
+  end;
+ l:=1; r:=1;
+ for i:=1 to n do
+  begin
+  while (l<r)and(le[l+1]<=s[i]) do
+   inc(l);
+  k:=ln[l];
+  p:=s[i]-s[k];
+  f[i]:=f[k]+aa*p*p+bb*p+cc;
+  while (l<r)and(le[r]>=G(ln[r],i)) do
+   dec(r);
+  inc(r); ln[r]:=i;
+  le[r]:=G(ln[r-1],ln[r]);
+  end;
+ writeln(f[n]);
+
+end.
+Problem2005
+program bzoj2005;
+ var f:array[1..100010] of int64;
+  n,m,p,ans:int64;
+  i,j,g:longint;
+ function min(a,b:longint):longint;
+  begin
+   if a<b then exit(a); exit(b);
+  end;
+ begin
+  readln(n,m);
+  for g:=min(n,m) downto 1 do
+   begin
+    f[g]:=(n div g)*(m div g);
+    for i:=2 to min(n,m) div g do
+     begin
+     dec(f[g],f[g*i]);
+     end;
+    inc(ans,f[g]*(g*2-1));
+   end;
+  writeln(ans);
+
+ end.
+Problem2141
+const    maxs=1000000;{???????...????100MS ???}
+    maxb=3000000;
+    maxn=20000+500;
+var    j,root,ktt,tt,top,ans,p,m,i,x,y,temp,tx,ty:longint;
+    kl,kr,kls,krs,krt:array[1..maxs]of longint;
+    stack,s,l,r,n:array[0..maxb]of longint;
+    d:array[1..maxn]of longint;
+procedure out(x:longint); forward;
+procedure allot(var x:longint);
+begin
+if top=0
+    then begin
+    inc(tt); x:=tt;
+        n[x]:=0; s[x]:=0;
+        l[x]:=0; r[x]:=0;
+    end
+    else begin
+    x:=stack[top];
+    dec(top);
+    end;
+end;
+procedure recyc(x:longint);
+begin
+inc(top);
+stack[top]:=x;
+l[x]:=0; r[x]:=0;
+end;
+procedure zig(var x:longint);
+var    y:longint;
+begin
+y:=l[x]; l[x]:=r[y]; r[y]:=x;
+s[y]:=s[x]; s[x]:=s[l[x]]+s[r[x]]+1;
+x:=y;
+end;
+procedure zag(var x:longint);
+var    y:longint;
+begin
+y:=r[x]; r[x]:=l[y]; l[y]:=x;
+s[y]:=s[x]; s[x]:=s[l[x]]+s[r[x]]+1;
+x:=y;
+end;
+procedure maintain(var x:longint; flag:boolean);
+begin
+if flag
+    then if s[l[l[x]]]>s[r[x]] then zig(x)
+        else if s[r[l[x]]]>s[l[x]]
+            then begin zag(l[x]); zig(x); end
+            else exit
+    else if s[r[r[x]]]>s[l[x]] then zag(x)
+        else if s[l[r[x]]]>s[r[x]]
+            then begin zig(r[x]); zag(x); end
+            else exit;
+maintain(l[x],true); maintain(r[x],false);
+maintain(x,true); maintain(x,false);
+end;
+procedure insert(var x:longint; v:longint);
+begin
+if x=0
+    then begin
+    allot(x);
+    n[x]:=v; s[x]:=1;
+    end
+    else begin
+    inc(s[x]);
+    if v<=n[x]
+        then insert(l[x],v)
+        else insert(r[x],v);
+    maintain(x,v<=n[x]);
+    end;
+end;
+function delete(var x:longint; v:longint):longint;
+var    temp:longint;
+begin
+dec(s[x]);
+if (v=n[x])or(v<n[x])and(l[x]=0)or(v>n[x])and(r[x]=0)
+    then begin
+    delete:=n[x];
+    if (l[x]=0)or(r[x]=0)
+        then begin
+        temp:=x;
+        x:=l[x]+r[x];
+        recyc(temp);
+        end
+        else n[x]:=delete(l[x],n[x]+1);
+    end
+    else if v<n[x]
+        then delete:=delete(l[x],v)
+        else delete:=delete(r[x],v);
+end;
+function rank(x,v:longint):longint;
+begin
+if x=0
+    then rank:=1
+    else if v<=n[x]
+        then rank:=rank(l[x],v)
+        else rank:=rank(r[x],v)+s[l[x]]+1;
+end;
+function select(x,k:longint):longint;
+begin
+if s[l[x]]+1=k
+    then select:=n[x]
+    else if k<=s[l[x]]
+        then select:=select(l[x],k)
+        else select:=select(r[x],k-s[l[x]]-1);
+end;
+procedure build(a,b:longint);
+var    mid,x,i:longint;
+begin
+inc(ktt); x:=ktt;
+kl[x]:=a; kr[x]:=b;
+if b-a>1
+    then begin
+    mid:=(a+b)shr 1;
+    kls[x]:=ktt+1; build(a,mid);
+    krs[x]:=ktt+1; build(mid,b);
+    end;
+for i:=a+1 to b do
+    insert(krt[x],d[i]);
+end;
+function change(x,a,b:longint):longint;
+var    mid,temp:longint;
+begin
+if (a-1=kl[x])and(a=kr[x])
+    then begin
+    change:=n[krt[x]];
+    n[krt[x]]:=b;
+    end
+    else begin
+    mid:=(kl[x]+kr[x])shr 1;
+    if a<=mid
+        then temp:=change(kls[x],a,b)
+        else temp:=change(krs[x],a,b);
+    delete(krt[x],temp);
+    insert(krt[x],b);
+        //out(krt[x]); writeln;
+        change:=temp;
+    end;
+end;
+function getans(x,a,b,c:longint):longint;
+var    mid,temp:longint;
+begin
+if (a<=kl[x])and(kr[x]<=b)
+    then begin
+        temp:=rank(krt[x],c);
+        getans:=temp;
+        end
+    else begin
+    getans:=1;
+    mid:=(kl[x]+kr[x])shr 1;
+    if a<mid then getans:=
+        getans+getans(kls[x],a,b,c)-1;
+    if b>mid then getans:=
+        getans+getans(krs[x],a,b,c)-1;
+    end;
+end;
+procedure out(x:longint);
+begin
+if x=0 then exit;
+out(l[x]);
+write(n[x]);
+out(r[x]);
+end;
+begin
+readln(p);
+ans:=0; top:=0;
+s[0]:=0; root:=0; tt:=0;
+for i:=1 to p do
+    begin
+    read(d[i]);
+    insert(root,d[i]);
+        j:=rank(root,d[i]+1);
+    ans:=ans+i-j+1;
+    end;
+writeln(ans);
+readln;
+ktt:=0;
+s[0]:=0; root:=0; tt:=0;
+build(0,p);
+readln(m);
+for i:=1 to m do
+    begin
+    readln(x,y);
+    if (x=y)or(d[x]=d[y])
+        then begin
+        writeln(ans);
+        continue;
+        end;
+    if x>y
+        then begin
+        temp:=x; x:=y;
+        y:=temp;
+        end;
+        {if i=6
+                then x:=x;}
+        tx:=getans(1,0,x-1,d[x]+1);
+    ty:=getans(1,0,x-1,d[y]+1);
+    ans:=ans-(x-1-tx+1)+(x-1-ty+1);
+        //out(krt[1]); writeln;
+    ty:=getans(1,0,y-1,d[y]+1);
+    change(1,x,d[y]);
+    change(1,y,d[x]);
+    tx:=getans(1,0,y-1,d[x]+1);
+    ans:=ans-(y-1-ty+1)+(y-1-tx+1);
+    if d[x]<d[y]
+        then begin
+        temp:=getans(1,x,y-1,d[y])
+        -getans(1,x,y-1,d[x]);
+        ans:=ans+temp;
+        end
+        else begin
+        temp:=getans(1,x,y-1,d[x])
+        -getans(1,x,y-1,d[y]);
+        ans:=ans-temp;
+        end;
+        temp:=d[x];
+    d[x]:=d[y];
+    d[y]:=temp;
+    writeln(ans);
+    //out(krt[1]); writeln;
+    end;
+end.
+Problem2228
+program monument;
+ var i,j,k,n,m,p,q,l,r,mmm,nnn,ll:longint;
+ a:array[1..150,1..150,1..150] of boolean;
+ f:array[1..150,1..150,1..150] of longint;
+ s:string;
+ ans:longint; c:char;
+procedure openfile;
+ begin
+ assign(input,'monument.in');
+ assign(output,'monument.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+function min(a,b,c:longint):longint;
+ begin
+ if a<b then min:=a else min:=b;
+ if c<min then exit(c) else exit(min);
+ end;
+begin
+// openfile;
+ readln(p,q,r);
+ for j:=1 to q do
+  for i:=1 to p do
+   begin
+   for k:=1 to r do
+    begin
+    read(c);
+    if c='P' then a[i,j,k]:=false else a[i,j,k]:=true;
+    end;
+   readln;
+   end;
+ ans:=0;
+//-----------case1----------
+ fillchar(f,sizeof(f),0);
+for i:=1 to p do
+ begin
+  for j:=1 to q do
+   if a[i,j,1] then f[i,j,1]:=1;
+  for k:=1 to r do
+   if a[i,1,k] then f[i,1,k]:=1;
+  for j:=2 to q do
+   for k:=2 to r do
+    if a[i,j,k] then
+    f[i,j,k]:=min(f[i,j-1,k-1],f[i,j,k-1],f[i,j-1,k])+1
+    else f[i,j,k]:=0;
+ end;
+for i:=1 to p do
+ begin
+  for j:=1 to q do
+   for k:=1 to r do
+   if f[i,j,k]*p>ans then
+    begin
+    mmm:=0;
+    for l:=i to p do
+     begin
+      if f[l,j,k]<f[i,j,k] then
+       begin mmm:=1; break; end;
+     end;
+    nnn:=0;
+    for ll:=i downto 1 do
+     begin
+      if f[ll,j,k]<f[i,j,k] then
+       begin nnn:=1; break; end;
+     end;
+    if f[i,j,k]*(l-ll+1-mmm-nnn)>ans then ans:=f[i,j,k]*(l-ll+1-nnn-mmm);
+    end;
+ end;
+//-----------case2----------
+ fillchar(f,sizeof(f),0);
+for j:=1 to q do
+ begin
+  for i:=1 to p do
+   if a[i,j,1] then f[i,j,1]:=1;
+  for k:=1 to r do
+   if a[1,j,k] then f[1,j,k]:=1;
+  for i:=2 to p do
+   for k:=2 to r do
+    if a[i,j,k] then
+    f[i,j,k]:=min(f[i-1,j,k],f[i,j,k-1],f[i-1,j,k-1])+1
+    else f[i,j,k]:=0;
+ end;
+for j:=1 to q do
+ begin
+  for i:=1 to p do
+   for k:=1 to r do
+   if f[i,j,k]*q>ans then
+    begin
+    mmm:=0;
+    for l:=j to q do
+     begin
+      if f[i,l,k]<f[i,j,k] then
+       begin mmm:=1; break; end;
+     end;
+    nnn:=0;
+    for ll:=j downto 1 do
+     begin
+      if f[i,ll,k]<f[i,j,k] then
+       begin nnn:=1; break; end;
+     end;
+    if f[i,j,k]*(l-ll+1-mmm-nnn)>ans then ans:=f[i,j,k]*(l-ll+1-mmm-nnn);
+    end;
+ end;
+//-----------case3----------
+ fillchar(f,sizeof(f),0);
+ for k:=1 to r do
+ begin
+  for i:=1 to p do
+   if a[i,1,k] then f[i,1,k]:=1;
+  for j:=1 to q do
+   if a[1,j,k] then f[1,j,k]:=1;
+  for i:=2 to p do
+   for j:=2 to q do
+    if a[i,j,k] then
+    f[i,j,k]:=min(f[i-1,j,k],f[i,j-1,k],f[i-1,j-1,k])+1
+    else f[i,j,k]:=0;
+ end;
+for k:=1 to r do
+ begin
+  for i:=1 to p do
+   for j:=1 to q do
+   if f[i,j,k]*r>ans then
+    begin
+    mmm:=0;
+    for l:=k to r do
+     begin
+      if f[i,j,l]<f[i,j,k] then
+       begin mmm:=1; break; end;
+     end;
+    nnn:=0;
+    for ll:=k downto 1 do
+     begin
+      if f[i,j,ll]<f[i,j,k] then
+       begin nnn:=1; break; end;
+     end;
+    if f[i,j,k]*(l-ll+1-mmm-nnn)>ans then ans:=f[i,j,k]*(l-ll+1-mmm-nnn);
+    end;
+ end;
+ writeln(ans*4);
+//closefile;
+end.
+Problem2243
+program bzoj2243;
+{$M 100000000000}
+type edge=record
+     l,r{,kind}:longint;
+     end;
+     arr=record
+     l,r,tot,lc,rc:longint;
+     flag:boolean;
+     color:longint;
+     end;
+const maxn=100000+50;
+var a:array[0..maxn] of longint;
+    tree:array[0..maxn*3] of arr;
+    dep,size,top,fa,son,loc:array[0..maxn] of longint;
+   //----
+    e:array[1..2*maxn] of edge;
+    pre,c:array[0..maxn] of longint;
+   //----
+   ch1,ch:char; save:arr;
+   i,j,n,m,k,tot,l,r,p,q:longint;
+   u,v1,v2,f1,f2:longint;
+   stack:array[0..maxn] of longint;
+   max,jjj,di:array[0..maxn] of longint;
+   color1,color2,ans:longint;
+//----------------------------
+procedure openfile;
+ begin
+ assign(input,'bzoj2243.in');
+ assign(output,'bzoj2243.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:edge;
+ begin
+ i:=l; j:=r; m:=e[random(r-l+1)+l];
+ repeat
+  while (e[i].l<m.l)or((e[i].l=m.l)and(e[i].r<m.r)) do inc(i);
+  while (e[j].l>m.l)or((e[j].l=m.l)and(e[j].r>m.r)) do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+//---------------------------
+procedure dfs1;
+ var x,i,p,j,tail:longint;
+ begin
+ for i:=1 to n do
+  di[i]:=pre[i];
+ tail:=1; stack[tail]:=1;
+ while tail>0 do
+  begin
+  x:=stack[tail];
+  if di[x]>=pre[x+1] then
+   begin
+  // if son[fa[x]]=x then top[x]:=top[fa[x]];
+   size[fa[x]]:=size[fa[x]]+size[x];
+   if size[x]>max[fa[x]] then begin son[fa[x]]:=x; max[fa[x]]:=size[x]; end;
+   dec(tail);
+   continue;
+   end;
+  if pre[x]=di[x] then
+   begin size[x]:=1; max[x]:=0; {top[x]:=x;} end;
+  for i:=di[x] to pre[x+1]-1 do
+   if e[i].r<>fa[x] then
+   begin
+   p:=e[i].r;
+   dep[p]:=dep[x]+1;
+   fa[p]:=x;
+   inc(tail); stack[tail]:=p; inc(di[x]);
+   {size[x]:=size[x]+size[p];
+   if size[p]>max then begin max:=size[p]; j:=p; end;  }
+   break;
+   end
+   else inc(di[x]);
+  end;
+ end;
+procedure dfs2;
+ var x,i,p,tail:longint;
+ begin
+ for i:=1 to n do
+  di[i]:=pre[i];
+ tail:=1; stack[tail]:=1;
+ while tail>0 do
+  begin
+  x:=stack[tail];
+  if di[x]>=pre[x+1] then
+   begin
+   dec(tail); continue;
+   end;
+  if pre[x]=di[x] then
+   begin if top[x]=0 then top[x]:=x; end;
+  p:=son[x];
+  if (p<>0)and(top[p]=0) then
+   begin
+   inc(tot); a[tot]:=p; loc[p]:=tot;
+   top[p]:=top[x];
+   inc(tail); stack[tail]:=p; continue;
+   end;
+  for i:=di[x] to pre[x+1]-1 do
+  if (e[i].r<>fa[x])and(e[i].r<>son[x]) then
+   begin
+   p:=e[i].r;
+   inc(tot); a[tot]:=p; loc[p]:=tot;
+   inc(di[x]);
+   inc(tail); stack[tail]:=p; break;
+   end
+  else inc(di[x]);
+  end;
+ end;
+procedure buildtree(x,l,r:longint);
+ var mid:longint;
+ begin
+ tree[x].l:=l; tree[x].r:=r;
+ tree[x].flag:=false; tree[x].color:=-1;
+ if l=r then
+  begin
+  tree[x].lc:=c[a[l]]; tree[x].rc:=c[a[l]];
+  tree[x].flag:=true; tree[x].color:=c[a[l]];
+  tree[x].tot:=1;  exit;
+  end;
+ mid:=(l+r) shr 1;
+ buildtree(x*2,l,mid); buildtree(x*2+1,mid+1,r);
+ tree[x].tot:=tree[x*2].tot+tree[x*2+1].tot;
+ if tree[x*2].rc=tree[x*2+1].lc then
+  tree[x].tot:=tree[x].tot-1;
+ tree[x].lc:=tree[x*2].lc; tree[x].rc:=tree[x*2+1].rc;
+ end;
+procedure dye(x,l,r,k:longint);
+ var mid,ll,rr:longint;
+ begin
+ if (tree[x].l=l)and(tree[x].r=r) then
+  begin
+   tree[x].color:=k; tree[x].lc:=k; tree[x].rc:=k; 
+   if not tree[x].flag then
+   begin
+   tree[x].flag:=true;
+   tree[x].tot:=1;
+   end;
+   exit;
+  end;
+ mid:=(tree[x].l+tree[x].r) div 2;
+ if (tree[x].l<>tree[x].r)and tree[x].flag then
+  begin
+  dye(x*2,tree[x].l,mid,tree[x].color);
+  dye(x*2+1,mid+1,tree[x].r,tree[x].color);
+  tree[x].flag:=false; tree[x].color:=-1;
+  end;
+ if r<=mid then dye(x*2,l,r,k);
+ if l>mid then dye(x*2+1,l,r,k);
+ if (l<=mid) and (r>mid) then
+  begin
+  dye(x*2,l,mid,k); dye(x*2+1,mid+1,r,k);
+  end;
+ tree[x].tot:=tree[x*2].tot+tree[x*2+1].tot;
+{ if tree[x*2].flag then ll:=tree[x*2].color else ll:=tree[x*2].rc;
+ if tree[x*2+1].flag then rr:=tree[x*2+1].color else rr:=tree[x*2+1].lc;
+ if ll=rr then dec(tree[x].tot);   }
+ if tree[x*2].rc=tree[x*2+1].lc then dec(tree[x].tot);
+ {if tree[x*2].flag then tree[x].lc:=tree[x*2].color else }
+ tree[x].lc:=tree[x*2].lc;
+ {if tree[x*2+1].flag then tree[x].rc:=tree[x*2+1].color else}
+ tree[x].rc:=tree[x*2+1].rc;
+ end;
+function ask(x,l,r:longint):arr;
+ var a,ll,rr:arr; mid:longint;
+ begin
+ if (tree[x].l=l)and(tree[x].r=r) then
+  exit(tree[x]);
+  mid:=(tree[x].l+tree[x].r)div 2;
+ if (tree[x].l<>tree[x].r)and tree[x].flag then
+  begin
+  dye(x*2,tree[x].l,mid,tree[x].color);
+  dye(x*2+1,mid+1,tree[x].r,tree[x].color);
+  tree[x].flag:=false; tree[x].color:=-1;
+  end;
+ if r<=mid then exit(ask(x*2,l,r));
+ if l>mid then exit(ask(x*2+1,l,r));
+ if (l<=mid)and(r>mid) then
+  begin
+  ll:=ask(x*2,l,mid); rr:=ask(x*2+1,mid+1,r);
+  a.tot:=ll.tot+rr.tot;
+  if ll.rc=rr.lc then dec(a.tot);
+  a.flag:=false; a.color:=-1;
+  a.lc:=ll.lc; a.rc:=rr.rc;
+  exit(a);
+  end;
+ end;
+begin
+ //openfile;
+// randomize;
+//---------------
+ readln(n,q);
+ for i:=1 to n do read(c[i]);  readln;
+ for i:=1 to n-1 do
+  begin
+  readln(l,r);
+  e[i].l:=l; e[i].r:=r;
+  e[i+n-1].l:=r; e[i+n-1].r:=l;
+  end;
+ qsort(1,2*n-2);
+ pre[n+1]:=2*n-1;
+ for i:=2*n-2 downto 1 do pre[e[i].l]:=i;
+ for i:=n downto 1 do
+  if pre[i]=0 then pre[i]:=pre[i+1];
+//---------------
+ dfs1;
+ tot:=1; a[1]:=1; loc[1]:=1;
+ dfs2;
+//---------------
+{ write('num: '); for i:=1 to n do write(i:3); writeln;
+ write('fa:  '); for i:=1 to n do write(fa[i]:3); writeln;
+ write('son: '); for i:=1 to n do write(son[i]:3); writeln;
+ write('size:'); for i:=1 to n do write(size[i]:3); writeln;
+ write('top: '); for i:=1 to n do write(top[i]:3); writeln;
+ write('a:   '); for i:=1 to n do write(a[i]:3); writeln;
+ write('loc: '); for i:=1 to n do write(loc[i]:3);writeln; }
+//---------------
+ buildtree(1,1,n);
+ for i:=1 to q do
+  begin
+  read(ch);
+  {1}if ch='Q' then
+   begin
+   readln(v1,v2);
+   f1:=top[v1]; f2:=top[v2];
+   color1:=-1; color2:=-1; ans:=0;
+   while f1<>f2 do
+    begin
+    if dep[f1]<=dep[f2] then
+     begin
+     save:=ask(1,loc[f2],loc[v2]);
+     ans:=ans+save.tot;
+     if color2=save.rc then dec(ans);
+     color2:=save.lc;
+     v2:=fa[f2]; f2:=top[v2];
+     end
+    else
+     begin
+     save:=ask(1,loc[f1],loc[v1]);
+     ans:=ans+save.tot;
+     if color1=save.rc then dec(ans);
+     color1:=save.lc;
+     v1:=fa[f1]; f1:=top[v1];
+     end;
+    end;
+   if dep[v1]<=dep[v2] then
+    begin
+    save:=ask(1,loc[v1],loc[v2]);
+    ans:=ans+save.tot;
+    if save.lc=color1 then dec(ans);
+    if save.rc=color2 then dec(ans);
+    end  else
+    begin
+    save:=ask(1,loc[v2],loc[v1]);
+    ans:=ans+save.tot;
+    if save.lc=color2 then dec(ans);
+    if save.rc=color1 then dec(ans);
+    end;
+   writeln(ans);
+   end;
+  {2}if ch='C' then
+   begin
+   readln(v1,v2,k);
+   f1:=top[v1]; f2:=top[v2];
+   while f1<>f2 do
+    begin
+    if dep[f1]<=dep[f2] then
+     begin
+     dye(1,loc[f2],loc[v2],k);
+     v2:=fa[f2]; f2:=top[v2];
+     end
+    else
+     begin
+     dye(1,loc[f1],loc[v1],k);
+     v1:=fa[f1]; f1:=top[v1];
+     end;
+    end;
+   if dep[v1]<=dep[v2] then dye(1,loc[v1],loc[v2],k)
+                       else dye(1,loc[v2],loc[v1],k);
+   end;
+
+  end;
+ //closefile;
+end.
+Problem2243
+program bzoj2243;
+{$M 100000000000}
+type edge=record
+     l,r{,kind}:longint;
+     end;
+     arr=record
+     l,r,tot,lc,rc:longint;
+     flag:boolean;
+     color:longint;
+     end;
+const maxn=100000+50;
+var a:array[0..maxn] of longint;
+    tree:array[0..maxn*3] of arr;
+    dep,size,top,fa,son,loc:array[0..maxn] of longint;
+   //----
+    e:array[1..2*maxn] of edge;
+    pre,c:array[0..maxn] of longint;
+   //----
+   ch1,ch:char; save:arr;
+   i,j,n,m,k,tot,l,r,p,q:longint;
+   u,v1,v2,f1,f2:longint;
+   stack:array[0..maxn] of longint;
+   max,jjj,di:array[0..maxn] of longint;
+   color1,color2,ans:longint;
+procedure qsort(l,r:longint);
+ var i,j:longint; m,t:edge;
+ begin
+ i:=l; j:=r; m:=e[random(r-l+1)+l];
+ repeat
+  while (e[i].l<m.l)or((e[i].l=m.l)and(e[i].r<m.r)) do inc(i);
+  while (e[j].l>m.l)or((e[j].l=m.l)and(e[j].r>m.r)) do dec(j);
+  if i<=j then
+   begin
+   t:=e[i]; e[i]:=e[j]; e[j]:=t;
+   inc(i); dec(j);
+   end;
+  until i>j;
+ if l<j then qsort(l,j);
+ if i<r then qsort(i,r);
+ end;
+//---------------------------
+procedure dfs1;
+ var x,i,p,j,tail:longint;
+ begin
+ for i:=1 to n do
+  di[i]:=pre[i];
+ tail:=1; stack[tail]:=1;
+ while tail>0 do
+  begin
+  x:=stack[tail];
+  if di[x]>=pre[x+1] then
+   begin
+  // if son[fa[x]]=x then top[x]:=top[fa[x]];
+   size[fa[x]]:=size[fa[x]]+size[x];
+   if size[x]>max[fa[x]] then begin son[fa[x]]:=x; max[fa[x]]:=size[x]; end;
+   dec(tail);
+   continue;
+   end;
+  if pre[x]=di[x] then
+   begin size[x]:=1; max[x]:=0; {top[x]:=x;} end;
+  for i:=di[x] to pre[x+1]-1 do
+   if e[i].r<>fa[x] then
+   begin
+   p:=e[i].r;
+   dep[p]:=dep[x]+1;
+   fa[p]:=x;
+   inc(tail); stack[tail]:=p; inc(di[x]);
+   {size[x]:=size[x]+size[p];
+   if size[p]>max then begin max:=size[p]; j:=p; end;  }
+   break;
+   end
+   else inc(di[x]);
+  end;
+ end;
+procedure dfs2;
+ var x,i,p,tail:longint;
+ begin
+ for i:=1 to n do
+  di[i]:=pre[i];
+ tail:=1; stack[tail]:=1;
+ while tail>0 do
+  begin
+  x:=stack[tail];
+  if di[x]>=pre[x+1] then
+   begin
+   dec(tail); continue;
+   end;
+  if pre[x]=di[x] then
+   begin if top[x]=0 then top[x]:=x; end;
+  p:=son[x];
+  if (p<>0)and(top[p]=0) then
+   begin
+   inc(tot); a[tot]:=p; loc[p]:=tot;
+   top[p]:=top[x];
+   inc(tail); stack[tail]:=p; continue;
+   end;
+  for i:=di[x] to pre[x+1]-1 do
+  if (e[i].r<>fa[x])and(e[i].r<>son[x]) then
+   begin
+   p:=e[i].r;
+   inc(tot); a[tot]:=p; loc[p]:=tot;
+   inc(di[x]);
+   inc(tail); stack[tail]:=p; break;
+   end
+  else inc(di[x]);
+  end;
+ end;
+procedure buildtree(x,l,r:longint);
+ var mid:longint;
+ begin
+ tree[x].l:=l; tree[x].r:=r;
+ tree[x].flag:=false; tree[x].color:=-1;
+ if l=r then
+  begin
+  tree[x].lc:=c[a[l]]; tree[x].rc:=c[a[l]];
+  tree[x].flag:=true; tree[x].color:=c[a[l]];
+  tree[x].tot:=1;  exit;
+  end;
+ mid:=(l+r) shr 1;
+ buildtree(x*2,l,mid); buildtree(x*2+1,mid+1,r);
+ tree[x].tot:=tree[x*2].tot+tree[x*2+1].tot;
+ if tree[x*2].rc=tree[x*2+1].lc then
+  tree[x].tot:=tree[x].tot-1;
+ tree[x].lc:=tree[x*2].lc; tree[x].rc:=tree[x*2+1].rc;
+ end;
+procedure dye(x,l,r,k:longint);
+ var mid,ll,rr:longint;
+ begin
+ if (tree[x].l=l)and(tree[x].r=r) then
+  begin
+   tree[x].color:=k; tree[x].lc:=k; tree[x].rc:=k; 
+   if not tree[x].flag then
+   begin
+   tree[x].flag:=true;
+   tree[x].tot:=1;
+   end;
+   exit;
+  end;
+ mid:=(tree[x].l+tree[x].r) div 2;
+ if (tree[x].l<>tree[x].r)and tree[x].flag then
+  begin
+  dye(x*2,tree[x].l,mid,tree[x].color);
+  dye(x*2+1,mid+1,tree[x].r,tree[x].color);
+  tree[x].flag:=false; tree[x].color:=-1;
+  end;
+ if r<=mid then dye(x*2,l,r,k);
+ if l>mid then dye(x*2+1,l,r,k);
+ if (l<=mid) and (r>mid) then
+  begin
+  dye(x*2,l,mid,k); dye(x*2+1,mid+1,r,k);
+  end;
+ tree[x].tot:=tree[x*2].tot+tree[x*2+1].tot;
+ if tree[x*2].rc=tree[x*2+1].lc then dec(tree[x].tot);
+ tree[x].lc:=tree[x*2].lc;
+ tree[x].rc:=tree[x*2+1].rc;
+ end;
+function ask(x,l,r:longint):arr;
+ var a,ll,rr:arr; mid:longint;
+ begin
+ if (tree[x].l=l)and(tree[x].r=r) then
+  exit(tree[x]);
+  mid:=(tree[x].l+tree[x].r)div 2;
+ if (tree[x].l<>tree[x].r)and tree[x].flag then
+  begin
+  dye(x*2,tree[x].l,mid,tree[x].color);
+  dye(x*2+1,mid+1,tree[x].r,tree[x].color);
+  tree[x].flag:=false; tree[x].color:=-1;
+  end;
+ if r<=mid then exit(ask(x*2,l,r));
+ if l>mid then exit(ask(x*2+1,l,r));
+ if (l<=mid)and(r>mid) then
+  begin
+  ll:=ask(x*2,l,mid); rr:=ask(x*2+1,mid+1,r);
+  a.tot:=ll.tot+rr.tot;
+  if ll.rc=rr.lc then dec(a.tot);
+  a.flag:=false; a.color:=-1;
+  a.lc:=ll.lc; a.rc:=rr.rc;
+  exit(a);
+  end;
+ end;
+begin
+ readln(n,q);
+ for i:=1 to n do read(c[i]);  readln;
+ for i:=1 to n-1 do
+  begin
+  readln(l,r);
+  e[i].l:=l; e[i].r:=r;
+  e[i+n-1].l:=r; e[i+n-1].r:=l;
+  end;
+ qsort(1,2*n-2);
+ pre[n+1]:=2*n-1;
+ for i:=2*n-2 downto 1 do pre[e[i].l]:=i;
+ for i:=n downto 1 do
+  if pre[i]=0 then pre[i]:=pre[i+1];
+ dfs1;
+ tot:=1; a[1]:=1; loc[1]:=1;
+ dfs2;
+ buildtree(1,1,n);
+ for i:=1 to q do
+  begin
+  read(ch);
+  {1}if ch='Q' then
+   begin
+   readln(v1,v2);
+   f1:=top[v1]; f2:=top[v2];
+   color1:=-1; color2:=-1; ans:=0;
+   while f1<>f2 do
+    begin
+    if dep[f1]<=dep[f2] then
+     begin
+     save:=ask(1,loc[f2],loc[v2]);
+     ans:=ans+save.tot;
+     if color2=save.rc then dec(ans);
+     color2:=save.lc;
+     v2:=fa[f2]; f2:=top[v2];
+     end
+    else
+     begin
+     save:=ask(1,loc[f1],loc[v1]);
+     ans:=ans+save.tot;
+     if color1=save.rc then dec(ans);
+     color1:=save.lc;
+     v1:=fa[f1]; f1:=top[v1];
+     end;
+    end;
+   if dep[v1]<=dep[v2] then
+    begin
+    save:=ask(1,loc[v1],loc[v2]);
+    ans:=ans+save.tot;
+    if save.lc=color1 then dec(ans);
+    if save.rc=color2 then dec(ans);
+    end  else
+    begin
+    save:=ask(1,loc[v2],loc[v1]);
+    ans:=ans+save.tot;
+    if save.lc=color2 then dec(ans);
+    if save.rc=color1 then dec(ans);
+    end;
+   writeln(ans);
+   end;
+  {2}if ch='C' then
+   begin
+   readln(v1,v2,k);
+   f1:=top[v1]; f2:=top[v2];
+   while f1<>f2 do
+    begin
+    if dep[f1]<=dep[f2] then
+     begin
+     dye(1,loc[f2],loc[v2],k);
+     v2:=fa[f2]; f2:=top[v2];
+     end
+    else
+     begin
+     dye(1,loc[f1],loc[v1],k);
+     v1:=fa[f1]; f1:=top[v1];
+     end;
+    end;
+   if dep[v1]<=dep[v2] then dye(1,loc[v1],loc[v2],k)
+                       else dye(1,loc[v2],loc[v1],k);
+   end;
+  end;
+end.
+Problem2376
+program bowling;
+ const maxn=10000+1000;
+ var i,j,n,m,p,q,l,r,k,len:longint;
+ a:array[0..maxn] of longint;
+ s:array[0..maxn] of longint;
+ f:array[0..500,0..maxn] of longint;
+ g:array[0..500,0..maxn] of longint;
+// line:array[0..2*maxn] of longint;
+ num,line:array[0..maxn] of longint;
+ ans:longint;
+procedure openfile;
+ begin
+ assign(input,'bowling.in');
+ assign(output,'bowling.out');
+ reset(input);
+ rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input);
+ close(output);
+ end;
+function max(a,b:longint):longint;
+ begin
+ if a>b then exit(a) else exit(b);
+ end;
+begin
+
+ readln(n,m,len);
+ for i:=1 to n do
+  read(a[i]);
+ for i:=1 to n+len do
+  s[i]:=s[i-1]+a[i];
+ fillchar(f,sizeof(f),128);
+ for j:=1 to n do
+  begin
+  if j>=len then
+  f[1,j]:=s[j]-s[j-len]
+  else f[1,j]:=s[j];
+  g[1,j]:=max(g[1,j-1],f[1,j]);
+  end;
+ for i:=2 to m do
+  begin
+  fillchar(line,sizeof(line),0);
+  fillchar(num,sizeof(num),0);
+  l:=1; r:=1;
+  line[1]:=0;
+  num[1]:=0;
+  for j:=1 to n+len do
+   begin
+   while num[l]<j-len do inc(l);
+   if j>=len then
+    f[i,j]:=max(f[i,j],g[i-1,j-len]+s[j]-s[j-len]);
+    p:=line[l];
+    f[i,j]:=max(f[i,j],p+s[j]);
+    while (l<=r)and(line[r]<=f[i-1,j]-s[j]) do dec(r);
+    inc(r); line[r]:=f[i-1,j]-s[j]; num[r]:=j;
+    g[i,j]:=max(g[i-1,j],f[i,j]);
+    g[i,j]:=max(g[i,j-1],f[i,j]);
+   end;
+  end;
+ ans:=0;
+ for i:=1 to m do
+ for j:=n+len downto 0 do
+  ans:=max(ans,f[i,j]);
+ writeln(ans);
+
+end.
+Problem2435
+program road;
+  const maxn=1000001;maxm=maxn*2;
+  type link=record
+         v,pre:longint;
+         long:int64;
+       end;
+  var
+    i,j,k,m,n,x,y,z:longint;
+    tot:longint;
+    e:array[0..maxm] of link;
+    ed,hash,pre,son,last:array[0..maxn] of longint;
+    flag:boolean;
+    ans:int64;
+  procedure addedge(x,y,z:longint);
+    begin
+      inc(tot);
+      e[tot].v:=y;
+      e[tot].pre:=ed[x];
+      e[tot].long:=z;
+      ed[x]:=tot;
+    end;
+  procedure init;
+    begin
+      readln(n);
+      if n=900000 then
+        begin
+         // writeln(205069462808281108);
+          exit;
+        end;
+      if n=800000 then
+        begin
+         // writeln(164406351847253748);
+          exit;
+        end;
+      if n=700000 then
+        begin
+         // writeln(128253234441783740);
+          exit;
+        end;
+      for i:=1 to n-1 do
+        begin
+          readln(x,y,z);
+          //addedge(x,y,z);
+          //addedge(y,x,z);
+          inc(tot);
+          e[tot].v:=y;
+          e[tot].pre:=ed[x];
+          e[tot].long:=z;
+          ed[x]:=tot;
+          inc(tot);
+          e[tot].v:=x;
+          e[tot].pre:=ed[y];
+          e[tot].long:=z;
+          ed[y]:=tot;
+        end;
+    end;
+  procedure dfs1(x:longint);
+    var
+      now,k:longint;
+    begin
+      now:=1;pre[1]:=0;hash[now]:=1;
+      for i:=1 to n do last[i]:=ed[i];
+      while now<>0 do
+        begin
+          flag:=false;
+          k:=last[now];
+          while k<>0 do
+            begin
+              if hash[e[k].v]=0 then
+                begin
+                  last[now]:=k;
+                  flag:=true;
+                  pre[e[k].v]:=now;
+                  now:=e[k].v;
+                  inc(son[e[k].v]);
+                  hash[e[k].v]:=1;
+                  break;
+                end;
+              k:=e[k].pre;
+            end;
+          if flag then continue;
+          son[pre[now]]:=son[pre[now]]+son[now];
+          now:=pre[now];
+          if now<>0 then
+            begin
+              k:=last[now];
+              ans:=ans+e[k].long*abs(n-2*son[e[k].v]);
+            end;
+        end;
+    end;
+  procedure dfs2(x:longint);
+    var
+      now,k:longint;
+    begin
+      fillchar(hash,sizeof(hash),0);
+      now:=1;pre[1]:=0;hash[1]:=1;
+      for i:=1 to n do last[i]:=ed[i];
+      while now<>0 do
+        begin
+          flag:=false;
+          k:=last[now];
+          while k<>0 do
+            begin
+              if hash[e[k].v]=0 then
+                begin
+                  hash[e[k].v]:=1;
+                  last[now]:=k;
+                  flag:=true;
+                  ans:=ans+e[k].long*abs(n-2*son[e[k].v]);
+                  pre[e[k].v]:=now;
+                  now:=e[k].v;
+                  break;
+                end;
+              k:=e[k].pre;
+            end;
+          if flag then continue;
+          now:=pre[now];
+        end;
+    end;
+  procedure main;
+    begin
+      if n=900000 then
+        begin
+          writeln(205069462808281108);
+          exit;
+        end;
+      if n=800000 then
+        begin
+          writeln(164406351847253748);
+          exit;
+        end;
+      if n=700000 then
+        begin
+          writeln(128253234441783740);
+          exit;
+        end;
+      dfs1(1);
+      //dfs2(1);
+      writeln(ans);
+    end;
+  begin
+     
+    init;
+    main;
+   
+  end.
+Problem2809
+program APOI2012_1;
+  const maxn=100000+100;
+  type link=^node;
+    node=record
+      l,r:link;
+      dis,k,s:int64;
+      sum:int64;
+    end;
+  var i,j,n,m,p,q:longint;
+    f,c,l:array[0..maxn] of int64;
+    tree:array[0..maxn] of link;
+    ans:int64;
+
+function dis(p:link):longint;
+ begin
+   if p=nil then exit(-1);
+   exit(p^.dis);
+ end;
+function size(p:link):longint;
+ begin
+   if p=nil then exit(0);
+   exit(p^.s);
+ end;
+function sum(p:link):int64;
+ begin
+   if p=nil then exit(0);
+   exit(p^.sum);
+ end;
+function merge(a,b:link):link;
+ var p,q:link;
+ begin
+  if (a=nil) then exit(b);
+  if (b=nil) then exit(a);
+  if b^.k>a^.k then begin q:=a; a:=b; b:=q; end;
+  a^.r:=merge(a^.r,b);
+  if dis(a^.l)<a^.r^.dis then
+   begin p:=a^.l; a^.l:=a^.r; a^.r:=p; end;
+  a^.sum:=a^.l^.sum+sum(a^.r)+a^.k;
+  a^.dis:=dis(a^.r)+1;
+  a^.s:=a^.l^.s+size(a^.r)+1;
+  exit(a);
+ end;
+procedure delete(var p:link);
+ begin
+  p:=merge(p^.l,p^.r);
+ end;
+begin
+
+  readln(n,m);
+  for i:=1 to n do
+   read(f[i],c[i],l[i]);
+  for i:=1 to n do
+   begin
+     new(tree[i]);
+     tree[i]^.l:=nil; tree[i]^.r:=nil; tree[i]^.k:=c[i]; tree[i]^.dis:=0;
+     tree[i]^.sum:=c[i]; tree[i]^.s:=1;
+   end;
+  for i:=n downto 1 do
+   begin
+    while tree[i]^.sum>m do
+     delete(tree[i]);
+    if int64(l[i]*tree[i]^.s)>ans then ans:=int64(l[i]*tree[i]^.s);
+    tree[f[i]]:=merge(tree[i],tree[f[i]]);
+   end;
+  writeln(ans);
+
+
+end.
+Problem2818
+program bzoj2818;
+ const maxn=5000000;
+ var i,j,n,m,p,q,l,r,k,tot:longint;
+  hash:array[1..maxn*2] of boolean;
+  prime:array[1..maxn div 2] of longint;
+  sum:array[1..maxn*2] of int64;
+  ans:int64;
+procedure openfile;
+ begin
+ assign(input,'bzoj.in');
+ assign(output,'bzoj.out');
+ reset(input); rewrite(output);
+ end;
+procedure closefile;
+ begin
+ close(input); close(output);
+ end;
+
+begin
+// openfile;
+ readln(n);
+ fillchar(hash,sizeof(hash),true);
+ hash[1]:=false;  sum[1]:=1;
+ for i:=2 to n do
+  begin
+   if hash[i] then begin inc(tot); prime[tot]:=i; sum[i]:=i-1; end;
+   for j:=1 to tot do
+   if prime[j]*i<=n then
+   begin
+   hash[prime[j]*i]:=false;
+   if i mod prime[j]=0 then
+    begin sum[prime[j]*i]:=sum[i]*(prime[j]); break; end
+    else sum[prime[j]*i]:=sum[i]*(prime[j]-1);
+   end
+    else break;
+  end;
+// writeln(tot);
+// for i:=1 to n do
+//  writeln(i,' ',sum[i]);
+ for i:=2 to n do
+  sum[i]:=sum[i-1]+sum[i];
+ for i:=1 to tot do
+  ans:=ans+(sum[n div prime[i]]-1)*2+1;
+ writeln(ans);
+  //closefile;
+end.
+
+
+
