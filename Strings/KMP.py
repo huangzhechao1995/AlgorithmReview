@@ -1,14 +1,13 @@
 class KMP:
     
     def __init__(self, pat):
-        length = 0 # length of the previous longest prefix suffix
         M=len(pat)
         lps = [0]*M
         lps[0] = 0 # lps[0] is always 0 
         #meanning of lps array is: if matching fails when matching pat[j], then the next loc of pat should we try matching is lps[j]
         i = 1
         # the loop calculates lps[i] for i = 1 to M-1 
-        
+        length=0
         while i < M: 
             if pat[i]== pat[length]: 
                 length+= 1
@@ -24,6 +23,7 @@ class KMP:
                 else: 
                     lps[i] = 0
                     i += 1
+
         self.pat = pat
         self.lps = lps
     def match(self, txt, printing=False):
